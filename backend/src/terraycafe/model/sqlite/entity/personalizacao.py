@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey,Integer
 
-from terraycafe.model.sql.settings.connection import Base
+from terraycafe.model.sqlite.settings.connection import Base
 
 class Personalizacao(Base):
     __tablename__ = "personalizacao"

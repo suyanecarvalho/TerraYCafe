@@ -1,5 +1,5 @@
 from sqlalchemy import Column,Float, ForeignKey,Integer
-from terraycafe.model.sql.settings.connection import Base
+from terraycafe.model.sqlite.settings.connection import Base
 
 class Item_pedido(Base):
     __tablename__ = "item_pedido"
