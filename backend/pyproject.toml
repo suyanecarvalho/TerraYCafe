@@ -8,8 +8,6 @@ authors = [
 dependencies = [
     "fastapi>=0.115.14",
     "uvicorn[standard]>=0.34.3",
-    "sqlalchemy>=2.0.41",
-    "pytest>=8.4.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

@@ -49,31 +49,8 @@ typing-extensions==4.14.0
 typing-inspection==0.4.1
     # via pydantic
 uvicorn==0.34.3
-asgiref==3.8.1
-    # via django
-colorama==0.4.6
-    # via pytest
-greenlet==3.2.3
-    # via sqlalchemy
-iniconfig==2.1.0
-    # via pytest
-packaging==25.0
-    # via pytest
-pluggy==1.6.0
-    # via pytest
-pygments==2.19.2
-    # via pytest
-pytest==8.4.1
-    # via terraycafe
-sqlalchemy==2.0.41
     # via terraycafe
 watchfiles==1.1.0
     # via uvicorn
 websockets==15.0.1
     # via uvicorn
-sqlparse==0.5.3
-    # via django
-typing-extensions==4.14.0
-    # via sqlalchemy
-tzdata==2025.2
-    # via django
