@@ -1,0 +1,51 @@
+from terraycafe.model.sqlite.entity.item_pedido import Item_pedido   
+
+class ItemPedidoDAO:
+    def __init__(self, db_connection):
+        self.__db_connection = db_connection
+
+    def insert_item_pedido(self, pedido_id: int, preco: float, bebida_id: int) -> None:
+        with self.__db_connection as database:
+            try:
+                item_pedido_data = Item_pedido(
+                    pedido_id=pedido_id,
+                    preco=preco,
+                    Bebida_id=bebida_id
+                )
+                database.add(item_pedido_data)
+                database.commit()
+                print(f"Inseriu item de pedido: {item_pedido_data}")
+            except Exception as e:
+                database.rollback()
+                print(f"Erro ao inserir item de pedido: {e}")
+                raise e
+    
+    def get_item_pedido_by_id(self, item_pedido_id: int) -> Item_pedido:
+        with self.__db_connection as database:
+            try:
+                item_pedido = database.query(Item_pedido).filter(Item_pedido.id == item_pedido_id).first()
+                if item_pedido:
+                    return item_pedido
+                else:
+                    print(f"Item de pedido com ID {item_pedido_id} não encontrado.")
+                    return None
+            except Exception as e:
+                print(f"Erro ao buscar item de pedido: {e}")
+                raise e
+            
+    def update_item_pedido(self, item_pedido_id: int, pedido_id: int, preco: float, bebida_id: int) -> None:
+        with self.__db_connection as database:
+            try:
+                item_pedido = database.query(Item_pedido).filter(Item_pedido.id == item_pedido_id).first()
+                if item_pedido:
+                    item_pedido.pedido_id = pedido_id
+                    item_pedido.preco = preco
+                    item_pedido.Bebida_id = bebida_id
+                    database.commit()
+                    print(f"Atualizou item de pedido: {item_pedido}")
+                else:
+                    print(f"Item de pedido com ID {item_pedido_id} não encontrado.")
+            except Exception as e:
+                database.rollback()
+                print(f"Erro ao atualizar item de pedido: {e}")
+                raise e
