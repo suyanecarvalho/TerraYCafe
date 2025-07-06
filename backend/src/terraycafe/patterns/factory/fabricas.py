@@ -1,4 +1,4 @@
-from src.terraycafe.factory.bebida_factory import BebidaFactory
+from backend.src.terraycafe.patterns.factory.bebida_factory import BebidaFactory
 from terraycafe.model.sqlite.entity.bebida import Cafe, ChaPreto, Cappuccino, Mocha, Limonada, Latte, Affogato, ChaMatte, ChaHibisco, Expresso, CafeAmericano, MatchaLatte, ChaHortela, ChaGelado, Frappucino, ChocolateQuente
 
 
