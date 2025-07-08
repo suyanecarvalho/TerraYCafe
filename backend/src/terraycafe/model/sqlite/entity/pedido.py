@@ -1,6 +1,7 @@
 from sqlalchemy import Column, DateTime, Float, ForeignKey,Integer
 from sqlalchemy import String
-
+from terraycafe.patterns.observer.ClienteObserver import ClienteObserver
+from terraycafe.patterns.observer.CozinhaObserver import CozinhaObserver    
 
 try:
     from terraycafe.model.sqlite.settings.connection import Base
@@ -23,28 +24,23 @@ class Pedidos(Base):
     def __repr__(self) -> str:
         return f"<Pedidos(id={self.id}, status='{self.status}', valor_total={self.valor_total}, forma_pagamento='{self.forma_pagamento}', desconto={self.desconto}, data_hora={self.data_hora}, cliente_id={self.cliente_id})>"
 
-    # observers 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.observadores = []
-        self.itens = kwargs.get('itens', [])
+    def __init__(self, cliente_id, bebida):
+        self.cliente_id = cliente_id
+        self.bebida = bebida
+        self.estado = RecebidoState()
+        self.status = self.estado.get_nome()
 
-    def calcular_total(self):
-        self.valor_total = sum(item.calcular_preco() for item in self.itens)
-        return self.valor_total
+    def set_estado(self, novo_estado):
+        self.estado = novo_estado
+        self.status = novo_estado.get_nome()
 
-    def aplicar_desconto(self, estrategia):
-        desconto = estrategia.calcular_desconto(self)
-        self.valor_total -= desconto
+    def avancar_estado(self):
+        self.estado.proximo_estado(self)
 
-    def mudar_status(self):
-        self.status = self.status.atualizar()
+    def mudar_status(self, novo_status: str):
+        self.status = novo_status
         self.notificar_observadores()
-
-    def adicionar_observador(self, obs):
-        self.observadores.append(obs)
 
     def notificar_observadores(self):
         for obs in self.observadores:
-            obs.atualizar(self)
-       
+            obs.atualizar(self.id, self.status)
