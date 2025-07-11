@@ -2,6 +2,8 @@ from sqlalchemy import Column, DateTime, Float, ForeignKey,Integer
 from sqlalchemy import String
 from terraycafe.patterns.observer.ClienteObserver import ClienteObserver
 from terraycafe.patterns.observer.CozinhaObserver import CozinhaObserver    
+from terraycafe.patterns.state.recebido_state import RecebidoState
+from terraycafe.patterns. state.estado_cancelado import CanceladoState
 
 try:
     from terraycafe.model.sqlite.settings.connection import Base
@@ -44,3 +46,10 @@ class Pedidos(Base):
     def notificar_observadores(self):
         for obs in self.observadores:
             obs.atualizar(self.id, self.status)
+
+    def cancelar_pedido(self):
+        if self.status != "Recebido":
+            print("Só é possível cancelar pedidos no estado 'Recebido'.")
+            return
+        self.set_estado(CanceladoState())
+
