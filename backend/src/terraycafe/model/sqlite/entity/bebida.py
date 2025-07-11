@@ -14,6 +14,7 @@ class Bebida(Base):
 
     def __repr__(self) -> str:
         return f"<Bebida(id={self.id}, nome='{self.nome}', descricao='{self.descricao}', categoria='{self.categoria}', preco_base={self.preco_base})>"
+
 class Cafe(Bebida):
     def __init__(self):
         super().__init__(nome="Café", descricao="Café tradicional", categoria="Café", preco_base=5.0)

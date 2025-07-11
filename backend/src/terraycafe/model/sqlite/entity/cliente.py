@@ -9,7 +9,9 @@ class Cliente(Base):
     id= Column(Integer, nullable= False, primary_key=True)
     nome = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
+    telefone = Column(String(255), nullable=False, unique=True)
+    senha = Column(String(255), nullable=False, unique=True)
     pontos_fidelidade = Column(Integer, nullable=False)
 
     def __repr__(self) -> str:
-        return f"<Cliente(id={self.id}, nome='{self.nome}', email='{self.email}', pontos={self.pontos_fidelidade})>"
+        return f"<Cliente(id={self.id}, nome='{self.nome}', email='{self.email}', telefone='{self.telefone}',senha='{self.senha}', pontos={self.pontos_fidelidade})>"
