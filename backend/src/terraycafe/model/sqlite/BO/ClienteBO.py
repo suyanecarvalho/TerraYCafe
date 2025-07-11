@@ -5,10 +5,10 @@ class ClienteBO:
     def __init__(self, db_connection):
         self.dao = ClienteDAO(db_connection)
 
-    def cadastrar_cliente(self, nome: str, email: str,telefone: str, senha: str):
+    def cadastrar_cliente(self, nome: str, email: str, telefone: str, senha: str):
         if self.dao.get_cliente_by_email(email):
             raise ValueError("Cliente já cadastrado com este email.")
-        self.dao.insert_cliente(nome=nome, email=email,telefone=telefone,senha=senha, ponto_fidelidade=0)
+        self.dao.insert_cliente(nome=nome, email=email, telefone=telefone, senha=senha, ponto_fidelidade=0)
 
     def registrar_pedido(self, cliente_id: int):
         cliente = self.dao.incrementar_pedidos(cliente_id)

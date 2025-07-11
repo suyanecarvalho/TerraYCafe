@@ -1,6 +1,6 @@
 
 CREATE TABLE IF NOT EXISTS Bebida (
-    id bigint NOT NULL CONSTRAINT Bebida_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome varchar(255) NOT NULL,
     descricao varchar(255) NOT NULL,
     preco_base float NOT NULL,
@@ -9,15 +9,17 @@ CREATE TABLE IF NOT EXISTS Bebida (
 
 -- Table: Cliente
 CREATE TABLE IF NOT EXISTS Cliente (
-    id bigint NOT NULL CONSTRAINT Cliente_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome varchar(255) NOT NULL,
     email varchar(255) NOT NULL UNIQUE,
-    pontos_fidelidade int NOT NULL
+    telefone varchar(255),
+    senha varchar(255),
+    pontos_fidelidade int NOT NULL DEFAULT 0
 );
 
 -- Table: Ingredientes
 CREATE TABLE IF NOT EXISTS Ingredientes (
-    id bigint NOT NULL CONSTRAINT Ingredientes_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome varchar(255) NOT NULL,
     tipo varchar(255) NOT NULL,
     preco_adicional float NOT NULL
@@ -25,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Ingredientes (
 
 -- Table: Pedidos
 CREATE TABLE IF NOT EXISTS Pedidos (
-    id bigint NOT NULL CONSTRAINT Pedidos_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     status varchar(50) NOT NULL,
     valor_total float NOT NULL,
     forma_pagamento varchar(50) NOT NULL,
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS Pedidos (
 
 -- Table: item_pedido (criada antes de Personalizacao devido à referência)
 CREATE TABLE IF NOT EXISTS item_pedido (
-    id bigint NOT NULL CONSTRAINT item_pedido_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     pedido_id bigint NOT NULL,
     preco float NOT NULL,
     Bebida_id bigint NOT NULL,
@@ -50,7 +52,7 @@ CREATE TABLE IF NOT EXISTS item_pedido (
 
 -- Table: Personalizacao
 CREATE TABLE IF NOT EXISTS Personalizacao (
-    id bigint NOT NULL CONSTRAINT Personalizacao_pk PRIMARY KEY ,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     Ingredientes_id bigint NOT NULL,
     item_pedido_id bigint NOT NULL,
     CONSTRAINT Personalizacao_Ingredientes FOREIGN KEY (Ingredientes_id)
