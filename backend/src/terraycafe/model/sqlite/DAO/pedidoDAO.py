@@ -1,9 +1,13 @@
 from terraycafe.model.sqlite.entity.pedido import Pedidos
+from terraycafe.patterns.state.recebido_state import RecebidoState
+
 
 class PedidoDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
-
+        self.estado = RecebidoState()
+        self.observadores = []
+        
     def insert_pedido(self, status: str, valor_total: float, forma_pagamento: str, desconto: int, data_hora, cliente_id: int) -> None:
         with self.__db_connection as database:
             try:
@@ -23,7 +27,7 @@ class PedidoDAO:
                 print(f"Erro ao inserir pedido: {e}")
                 raise e
 
-    def get_pedido_by_id(self, pedido_id: int) -> Pedidos:
+    def buscar_por_id(self, pedido_id: int) -> Pedidos:
         with self.__db_connection as database:
             try:
                 pedido = database.query(Pedidos).filter(Pedidos.id == pedido_id).first()
@@ -36,7 +40,7 @@ class PedidoDAO:
                 print(f"Erro ao buscar pedido: {e}")
                 raise e
 
-    def update_pedido(self, pedido_id: int, status: str, valor_total: float, forma_pagamento: str, desconto: int, data_hora, cliente_id: int) -> None:
+    def atualizar(self, pedido_id: int, status: str, valor_total: float, forma_pagamento: str, desconto: int, data_hora, cliente_id: int) -> None:
         with self.__db_connection as database:
             try:
                 pedido = database.query(Pedidos).filter(Pedidos.id == pedido_id).first()
@@ -69,4 +73,21 @@ class PedidoDAO:
             except Exception as e:
                 database.rollback()
                 print(f"Erro ao deletar pedido: {e}")
+                raise e
+    
+    def salvar(self, pedido: Pedidos) -> None:
+        with self.__db_connection as database:
+            try:
+                if pedido.id:
+                    pedido_existente = database.query(Pedidos).filter(Pedidos.id == pedido.id).first()
+                    if pedido_existente:
+                        for attr, value in vars(pedido).items():
+                            if attr != "_sa_instance_state":
+                                setattr(pedido_existente, attr, value)
+                        print(f"Atualizou pedido: {pedido_existente}")
+                else:
+                    database.add(pedido)
+                database.commit()
+            except Exception as e:
+                database.rollback()
                 raise e

@@ -1,16 +1,15 @@
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import declarative_base
 from terraycafe.patterns.state.recebido_state import RecebidoState
 from terraycafe.model.sqlite.settings.connection import Base
-from terraycafe.patterns.observer.cliente_observer import ClienteObserver   
+from terraycafe.patterns.observer.cliente_observer import ClienteObserver
 from terraycafe.patterns.observer.cozinha_observer import CozinhaObserver
 
-Base = declarative_base()
 
 class Pedidos(Base):
     __tablename__ = "pedidos"
+    __table_args__ = {'extend_existing': True}
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     status = Column(String(50), nullable=False)
     valor_total = Column(Float, nullable=False)
     forma_pagamento = Column(String(50), nullable=False)
@@ -18,23 +17,13 @@ class Pedidos(Base):
     data_hora = Column(DateTime, nullable=False)
     cliente_id = Column(Integer, ForeignKey('cliente.id'))
 
-    
     def __repr__(self) -> str:
         return (
             f"<Pedidos(id={self.id}, status='{self.status}', valor_total={self.valor_total}, "
             f"forma_pagamento='{self.forma_pagamento}', desconto={self.desconto}, "
             f"data_hora={self.data_hora}, cliente_id={self.cliente_id})>"
         )
-
-    def __init__(self, cliente_id, bebida):
-        self.cliente_id = cliente_id
-        self.bebida = bebida  
-        self.estado = RecebidoState()
-        self.status = self.estado.get_nome()
-        self.observadores = []
-        self.registrar_observadores()
-        self.notificar_observadores()
-
+    
     # Métodos de comportamento 
     def adicionar_observador(self, obs):
         if not hasattr(self, "observadores"):
@@ -59,4 +48,5 @@ class Pedidos(Base):
         self.estado.proximo_estado(self)
         self.status = self.estado.get_nome()
         self.notificar_observadores()
+
 

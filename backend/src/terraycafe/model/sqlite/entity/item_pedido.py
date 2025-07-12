@@ -4,7 +4,7 @@ from terraycafe.model.sqlite.settings.connection import Base
 class Item_pedido(Base):
     __tablename__ = "item_pedido"
 
-    id= Column(Integer, nullable= False, primary_key=True)
+    id= Column(Integer, primary_key=True, autoincrement=True)
     preco = Column(Float, nullable=False)
     pedido_id = Column(Integer, ForeignKey('pedidos.id'))
     bebida_id = Column(Integer, ForeignKey('bebida.id'))

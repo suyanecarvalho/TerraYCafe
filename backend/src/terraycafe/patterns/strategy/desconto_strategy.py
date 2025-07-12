@@ -1,7 +1,7 @@
-from abc import AbC, abstractmethod
+from abc import ABC, abstractmethod
 
 #classe que define a interface de estrategias de desconto(que sao iguais p todos)
-class DescontoStrategy(AbC):
+class DescontoStrategy(ABC):
     @abstractmethod
     def calcular_desconto(self, valor: float) -> float:
         pass

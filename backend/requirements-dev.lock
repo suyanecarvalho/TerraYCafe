@@ -25,7 +25,7 @@ colorama==0.4.6
     # via uvicorn
 distlib==0.3.9
     # via virtualenv
-fastapi==0.115.14
+fastapi==0.116.1
     # via terraycafe
 filelock==3.18.0
     # via virtualenv

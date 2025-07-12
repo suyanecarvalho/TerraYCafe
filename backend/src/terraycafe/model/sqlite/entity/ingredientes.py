@@ -6,7 +6,7 @@ from terraycafe.model.sqlite.settings.connection import Base
 class Ingredientes(Base):
     __tablename__ = "ingredientes"
 
-    id= Column(Integer, nullable= False, primary_key=True)
+    id= Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(255), nullable=False)
     tipo = Column(String(255), nullable=False)
     preco_adicional = Column(Float, nullable=False)

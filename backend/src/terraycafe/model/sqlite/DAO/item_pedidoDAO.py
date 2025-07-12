@@ -49,3 +49,16 @@ class ItemPedidoDAO:
                 database.rollback()
                 print(f"Erro ao atualizar item de pedido: {e}")
                 raise e
+                
+    def get_ultimo_item_pedido(self) -> Item_pedido:
+            with self.__db_connection as database:
+                try:
+                    item = database.query(Item_pedido).order_by(Item_pedido.id.desc()).first()
+                    if item:
+                        return item
+                    else:
+                        print("Nenhum item de pedido encontrado.")
+                        return None
+                except Exception as e:
+                    print(f"Erro ao buscar o último item de pedido: {e}")
+                    raise e
