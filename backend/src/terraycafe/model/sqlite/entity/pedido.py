@@ -1,55 +1,62 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey,Integer
-from sqlalchemy import String
-from terraycafe.patterns.observer.ClienteObserver import ClienteObserver
-from terraycafe.patterns.observer.CozinhaObserver import CozinhaObserver    
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import declarative_base
 from terraycafe.patterns.state.recebido_state import RecebidoState
-from terraycafe.patterns. state.estado_cancelado import CanceladoState
+from terraycafe.model.sqlite.settings.connection import Base
+from terraycafe.patterns.observer.cliente_observer import ClienteObserver   
+from terraycafe.patterns.observer.cozinha_observer import CozinhaObserver
 
-try:
-    from terraycafe.model.sqlite.settings.connection import Base
-except ImportError:
-    from sqlalchemy.orm import declarative_base
-    Base = declarative_base()
+Base = declarative_base()
 
 class Pedidos(Base):
     __tablename__ = "pedidos"
 
-    id = Column(Integer, nullable=False, primary_key=True)
+    id = Column(Integer, primary_key=True, nullable=False)
     status = Column(String(50), nullable=False)
     valor_total = Column(Float, nullable=False)
     forma_pagamento = Column(String(50), nullable=False)
     desconto = Column(Integer, nullable=False)
     data_hora = Column(DateTime, nullable=False)
-    
     cliente_id = Column(Integer, ForeignKey('cliente.id'))
 
+    
     def __repr__(self) -> str:
-        return f"<Pedidos(id={self.id}, status='{self.status}', valor_total={self.valor_total}, forma_pagamento='{self.forma_pagamento}', desconto={self.desconto}, data_hora={self.data_hora}, cliente_id={self.cliente_id})>"
+        return (
+            f"<Pedidos(id={self.id}, status='{self.status}', valor_total={self.valor_total}, "
+            f"forma_pagamento='{self.forma_pagamento}', desconto={self.desconto}, "
+            f"data_hora={self.data_hora}, cliente_id={self.cliente_id})>"
+        )
 
     def __init__(self, cliente_id, bebida):
         self.cliente_id = cliente_id
-        self.bebida = bebida
+        self.bebida = bebida  
         self.estado = RecebidoState()
         self.status = self.estado.get_nome()
+        self.observadores = []
+        self.registrar_observadores()
+        self.notificar_observadores()
+
+    # Métodos de comportamento 
+    def adicionar_observador(self, obs):
+        if not hasattr(self, "observadores"):
+            self.observadores = []
+        self.observadores.append(obs)
+
+    def notificar_observadores(self):
+        if hasattr(self, "observadores"):
+            for obs in self.observadores:
+                obs.atualizar(self.id, self.status)
+    
+    def registrar_observadores(self):
+        self.adicionar_observador(ClienteObserver())
+        self.adicionar_observador(CozinhaObserver())
 
     def set_estado(self, novo_estado):
         self.estado = novo_estado
-        self.status = novo_estado.get_nome()
+        self.status = self.estado.get_nome()
+        self.notificar_observadores()
 
     def avancar_estado(self):
         self.estado.proximo_estado(self)
-
-    def mudar_status(self, novo_status: str):
-        self.status = novo_status
+        self.status = self.estado.get_nome()
         self.notificar_observadores()
-
-    def notificar_observadores(self):
-        for obs in self.observadores:
-            obs.atualizar(self.id, self.status)
-
-    def cancelar_pedido(self):
-        if self.status != "Recebido":
-            print("Só é possível cancelar pedidos no estado 'Recebido'.")
-            return
-        self.set_estado(CanceladoState())
 
