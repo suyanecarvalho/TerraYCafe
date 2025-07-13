@@ -1,6 +1,9 @@
 from terraycafe.patterns.factory.bebida_factory import BebidaFactory
-from terraycafe.model.sqlite.entity.bebida import Cafe, ChaPreto, Cappuccino, Mocha, Limonada, Latte, Affogato, ChaMatte, ChaHibisco, Expresso, CafeAmericano, MatchaLatte, ChaHortela, ChaGelado, Frappucino, ChocolateQuente
-
+from terraycafe.model.sqlite.entity.bebida import (
+    Cafe, ChaPreto, Cappuccino, Mocha, Limonada, Latte, Affogato,
+    ChaMatte, ChaHibisco, Expresso, CafeAmericano, MatchaLatte,
+    ChaHortela, ChaGelado, Frappucino, ChocolateQuente
+)
 
 class CafeFactory(BebidaFactory):
     def criar_bebida(self) -> Cafe:
@@ -9,7 +12,7 @@ class CafeFactory(BebidaFactory):
 class ChaPretoFactory(BebidaFactory):
     def criar_bebida(self) -> ChaPreto:
         return ChaPreto()
-    
+
 class CappuccinoFactory(BebidaFactory):
     def criar_bebida(self) -> Cappuccino:
         return Cappuccino()
@@ -45,15 +48,15 @@ class ExpressoFactory(BebidaFactory):
 class CafeAmericanoFactory(BebidaFactory):
     def criar_bebida(self) -> CafeAmericano:
         return CafeAmericano()
-    
+
 class MatchaLatteFactory(BebidaFactory):
     def criar_bebida(self) -> MatchaLatte:
         return MatchaLatte()
-    
+
 class ChaHortelaFactory(BebidaFactory):
     def criar_bebida(self) -> ChaHortela:
         return ChaHortela()
-    
+
 class ChaGeladoFactory(BebidaFactory):
     def criar_bebida(self) -> ChaGelado:
         return ChaGelado()
@@ -65,4 +68,25 @@ class FrappucinoFactory(BebidaFactory):
 class ChocolateQuenteFactory(BebidaFactory):
     def criar_bebida(self) -> ChocolateQuente:
         return ChocolateQuente()
-    
+
+_fabricas = {
+    "Cafe": CafeFactory(),
+    "ChaPreto": ChaPretoFactory(),
+    "Cappuccino": CappuccinoFactory(),
+    "Mocha": MochaFactory(),
+    "Limonada": LimonadaFactory(),
+    "Latte": LatteFactory(),
+    "Affogato": AffogatoFactory(),
+    "ChaMatte": ChaMatteFactory(),
+    "ChaHibisco": ChaHibiscoFactory(),
+    "Expresso": ExpressoFactory(),
+    "CafeAmericano": CafeAmericanoFactory(),
+    "MatchaLatte": MatchaLatteFactory(),
+    "ChaHortela": ChaHortelaFactory(),
+    "ChaGelado": ChaGeladoFactory(),
+    "Frappucino": FrappucinoFactory(),
+    "ChocolateQuente": ChocolateQuenteFactory(),
+}
+
+def get_fabrica(tipo: str) -> BebidaFactory | None:
+    return _fabricas.get(tipo)
