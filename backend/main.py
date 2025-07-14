@@ -1,0 +1,31 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from terraycafe.model.sqlite.settings.connection import Base, db_connection
+from terraycafe.controllers.rota_cliente import router as cliente_router
+from terraycafe.controllers.rota_pedido import router as pedido_router
+
+app = FastAPI(title="TerrayCaféAPI")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", 
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",        # ← ADICIONAR ESTA LINHA
+    "http://127.0.0.1:8080",        # ← E ESTA TAMBÉM
+    "http://192.168.0.6:8080" ], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+try:
+    db_conn = db_connection()
+    db_conn.connect_to_db()
+    engine = db_conn.get_engine()
+    Base.metadata.create_all(bind=engine)
+    print("Tabelas criadas")
+except Exception as e:
+    print(e)
+
+app.include_router(cliente_router)
+#app.include_router(pedido_router)
