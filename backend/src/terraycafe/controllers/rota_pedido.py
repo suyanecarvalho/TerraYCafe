@@ -9,7 +9,7 @@ from typing import List
 from terraycafe.model.sqlite.settings.connection import db_connection
 from terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
 
-router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
+router = APIRouter(prefix="/orders", tags=["Pedidos"])
 
 
 class ItemPedidoRequest(BaseModel):
@@ -27,9 +27,7 @@ def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connecti
     try:
         pedido = PedidoBO(db).criar_pedido(
             cliente_id=request.cliente_id,
-            tipo_bebida="",  # O tipo_bebida é por item agora
-            itens=[item.dict() for item in request.itens],
-            ingredientes=[],  # ingredientes também estão nos itens
+            itens=[item.dict() for item in request.itens],  
             forma_pagamento=request.forma_pagamento
         )
         return {
@@ -43,7 +41,6 @@ def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connecti
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao criar pedido: {e}")
 
-
 @router.patch("/{pedido_id}/status")
 def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
     try:
@@ -52,4 +49,12 @@ def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao avançar status: {e}")
 
-
+@router.patch("/{pedido_id}")
+def cancelar_pedido(pedido_id: int, db: Session = Depends(db_connection)):
+    try:
+        PedidoBO(db).cancelar_pedido(pedido_id)
+        return {"message": f"Pedido {pedido_id} cancelado com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao cancelar pedido: {e}")
+    
+    

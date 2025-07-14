@@ -62,3 +62,16 @@ class ItemPedidoDAO:
                 except Exception as e:
                     print(f"Erro ao buscar o último item de pedido: {e}")
                     raise e
+
+    def listar_por_pedido(self, pedido_id: int) -> List[Item_pedido]:
+        with self.__db_connection as database:
+            try:
+                itens = database.query(Item_pedido).filter(Item_pedido.pedido_id == pedido_id).all()
+                if itens:
+                    return itens
+                else:
+                    print(f"Nenhum item de pedido encontrado para o pedido ID {pedido_id}.")
+                    return []
+            except Exception as e:
+                print(f"Erro ao listar itens de pedido: {e}")
+                raise e

@@ -63,4 +63,16 @@ class PersonalizacaoDAO:
                 database.rollback()
                 print(f"Erro ao deletar personalização: {e}")
                 raise e
-    
+            
+    def listar_por_item_pedido(self, item_pedido_id: int):
+        with self.__db_connection as database:
+            try:
+                personalizacoes = database.query(Personalizacao).filter(Personalizacao.item_pedido_id == item_pedido_id).all()
+                if personalizacoes:
+                    return personalizacoes
+                else:
+                    print(f"Nenhuma personalização encontrada para o item de pedido com ID {item_pedido_id}.")
+                    return []
+            except Exception as e:
+                print(f"Erro ao listar personalizações: {e}")
+                raise e

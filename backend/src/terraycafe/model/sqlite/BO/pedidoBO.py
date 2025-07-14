@@ -66,9 +66,9 @@ class PedidoBO:
 
                 bebida = self.bebida_dao.insert_bebida(
                     nome =  bebida_personalizada.get_nome(),
-                    descricao=bebida_personalizada.get_descricao(),
-                    preco_base=preco,
-                    categoria=bebida_personalizada.get_categoria()
+                    descricao = bebida_personalizada.get_descricao(),
+                    preco_base = preco,
+                    categoria = bebida_personalizada.get_categoria()
                 )
 
                 self.item_pedido_dao.insert_item_pedido(
@@ -116,3 +116,33 @@ class PedidoBO:
         self.dao.atualizar(pedido.id,pedido.status)
         pedido.notificar_observadores()
         print("Pedido cancelado com sucesso.")
+
+    def listar_pedidos_por_cliente(self, cliente_id: int):
+        pedidos = self.dao.listar_por_cliente(cliente_id)
+        if not pedidos:
+            return []
+
+        pedidos_info = []
+        for pedido in pedidos:
+            itens = self.item_pedido_dao.listar_por_pedido(pedido.id)
+            itens_info = []
+            for item in itens:
+                bebida = self.bebida_dao.buscar_por_id(item.bebida_id)
+                ingredientes = self.personalizacao_dao.listar_por_item_pedido(item.id)
+                itens_info.append({
+                    "bebida": bebida.nome,
+                    "preco": item.preco,
+                    "ingredientes": [ing.nome for ing in ingredientes]
+                })
+
+            pedidos_info.append({
+                "id": pedido.id,
+                "status": pedido.status,
+                "valor_total": pedido.valor_total,
+                "forma_pagamento": pedido.forma_pagamento,
+                "desconto": pedido.desconto,
+                "data_hora": pedido.data_hora,
+                "itens": itens_info
+            })
+
+        return pedidos_info
