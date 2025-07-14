@@ -76,3 +76,15 @@ class BebidaDAO:
                 print(f"Erro ao buscar todas as bebidas: {e}")
                 raise e
     
+    def buscar_por_id(self, bebida_id: int) -> Bebida:
+        with self.__db_connection as database:
+            try:
+                bebida = database.query(Bebida).filter(Bebida.id == bebida_id).first()
+                if bebida:
+                    return bebida
+                else:
+                    print(f"Bebida com ID {bebida_id} não encontrada.")
+                    return None
+            except Exception as e:
+                print(f"Erro ao buscar bebida: {e}")
+                raise e

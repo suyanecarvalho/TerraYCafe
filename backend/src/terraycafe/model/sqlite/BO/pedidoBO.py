@@ -1,12 +1,13 @@
 from datetime import datetime
 from terraycafe.patterns.factory.selecionar_fabrica import get_fabrica
-from terraycafe.patterns.decorator.decorator import aplicar_personalizacoes
+from terraycafe.patterns.decorator.decorator import BebidaDecorator, aplicar_personalizacoes
 from terraycafe.model.sqlite.entity.pedido import Pedidos
 from terraycafe.model.sqlite.BO.PagamentoBO import PagamentoContext
 from terraycafe.model.sqlite.DAO.pedidoDAO import PedidoDAO
 from terraycafe.patterns.state.estado_cancelado import CanceladoState
 from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
 from terraycafe.model.sqlite.DAO.item_pedidoDAO import ItemPedidoDAO
+from terraycafe.model.sqlite.DAO.personalizacaoDAO import PersonalizacaoDAO
 
 
 class PedidoBO: 
@@ -14,8 +15,9 @@ class PedidoBO:
         self.dao = PedidoDAO(db_connection)
         self.bebida_dao = BebidaDAO(db_connection)
         self.item_pedido_dao = ItemPedidoDAO(db_connection)
+        self.personalizacao_dao = PersonalizacaoDAO(db_connection)
 
-    def criar_pedido( self,cliente_id: int,tipo_bebida: str,itens: list[dict],ingredientes: list,forma_pagamento: str) -> Pedidos:
+    def criar_pedido(self, cliente_id: int, itens: list[dict], forma_pagamento: str) -> Pedidos:
         try:
             pedido = Pedidos(
                 status="Recebido",
@@ -25,7 +27,7 @@ class PedidoBO:
                 data_hora=datetime.now(),
                 Cliente_id=cliente_id
             )
-            self.pedido_dao.salvar(pedido)
+            self.dao.salvar(pedido)
 
             itens_criados = []
             valor_bruto_total = 0.0
@@ -36,6 +38,9 @@ class PedidoBO:
                 ingrs = item.get("ingredientes", [])
 
                 fabrica = get_fabrica(tipo)
+                if not fabrica:
+                    raise ValueError(f"Tipo de bebida inválido: {tipo}")
+
                 bebida = fabrica.criar_bebida()
                 bebida_personalizada = aplicar_personalizacoes(bebida, ingrs)
 
@@ -48,48 +53,38 @@ class PedidoBO:
                     "preco_item": preco_item
                 })
 
-            # Processar pagamento
             pagamento = PagamentoContext(forma_pagamento)
             resultado_pagamento = pagamento.processar_pagamento(valor_bruto_total)
+            pedido.valor_total = resultado_pagamento["valor_final"]
+            pedido.desconto = int(resultado_pagamento["desconto"])
+            pedido.forma_pagamento = resultado_pagamento["tipo_pagamento"]
 
-            valor_com_desconto = resultado_pagamento["valor_final"]
-            desconto_total = resultado_pagamento["desconto"]
-            tipo_pagamento_final = resultado_pagamento["tipo_pagamento"]
-
-            pedido.valor_total = valor_com_desconto
-            pedido.desconto = int(desconto_total)
-            pedido.forma_pagamento = tipo_pagamento_final
-
-            # Salvar itens no banco
             for item in itens_criados:
-                bebida_pers = item["bebida_personalizada"]
+                bebida_personalizada = item["bebida_personalizada"]
                 ingrs = item["ingredientes"]
                 preco = item["preco_item"]
 
-                self.bebida_dao.insert_bebida(
-                    nome=bebida_pers.get_nome(),
-                    descricao=bebida_pers.get_descricao(),
-                    preco_base=preco,
-                    categoria=bebida_pers.get_categoria()
+                bebida = self.bebida_dao.insert_bebida(
+                    nome =  bebida_personalizada.get_nome(),
+                    descricao = bebida_personalizada.get_descricao(),
+                    preco_base = preco,
+                    categoria = bebida_personalizada.get_categoria()
                 )
-
-                bebida_id = self.bebida_dao.get_all_bebidas()[-1].id
 
                 self.item_pedido_dao.insert_item_pedido(
                     pedido_id=pedido.id,
                     preco=preco,
-                    bebida_id=bebida_id
+                    bebida_id=bebida.id
                 )
 
                 item_pedido = self.item_pedido_dao.get_ultimo_item_pedido()
 
                 for ingrediente_id in ingrs:
-                    self.item_pedido_dao.insert_personalizacao(
+                    self.personalizacao_dao.insert_personalizacao(
                         item_pedido_id=item_pedido.id,
                         ingredientes_id=ingrediente_id
                     )
 
-            # Notificar observers
             pedido.registrar_observadores()
             pedido.notificar_observadores()
 
@@ -98,6 +93,7 @@ class PedidoBO:
         except Exception as e:
             print(f"[PedidoBO] Erro ao criar pedido: {e}")
             raise
+
 
     def avancar_status(self, pedido_id: int):
         pedido = self.dao.buscar_por_id(pedido_id)
@@ -120,3 +116,33 @@ class PedidoBO:
         self.dao.atualizar(pedido.id,pedido.status)
         pedido.notificar_observadores()
         print("Pedido cancelado com sucesso.")
+
+    def listar_pedidos_por_cliente(self, cliente_id: int):
+        pedidos = self.dao.listar_por_cliente(cliente_id)
+        if not pedidos:
+            return []
+
+        pedidos_info = []
+        for pedido in pedidos:
+            itens = self.item_pedido_dao.listar_por_pedido(pedido.id)
+            itens_info = []
+            for item in itens:
+                bebida = self.bebida_dao.buscar_por_id(item.bebida_id)
+                ingredientes = self.personalizacao_dao.listar_por_item_pedido(item.id)
+                itens_info.append({
+                    "bebida": bebida.nome,
+                    "preco": item.preco,
+                    "ingredientes": [ing.nome for ing in ingredientes]
+                })
+
+            pedidos_info.append({
+                "id": pedido.id,
+                "status": pedido.status,
+                "valor_total": pedido.valor_total,
+                "forma_pagamento": pedido.forma_pagamento,
+                "desconto": pedido.desconto,
+                "data_hora": pedido.data_hora,
+                "itens": itens_info
+            })
+
+        return pedidos_info
