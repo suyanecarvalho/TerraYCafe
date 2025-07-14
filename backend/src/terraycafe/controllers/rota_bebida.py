@@ -9,7 +9,6 @@ from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
 router = APIRouter(prefix="/drinks", tags=["Bebidas"])
 
 
-# Pydantic schema para entrada de dados
 class BebidaCreateRequest(BaseModel):
     nome: str
     descricao: str
