@@ -8,7 +8,6 @@ class Ingredientes(Base):
 
     id= Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(255), nullable=False)
-    tipo = Column(String(255), nullable=False)
     preco_adicional = Column(Float, nullable=False)
 
     def __repr__(self) -> str:

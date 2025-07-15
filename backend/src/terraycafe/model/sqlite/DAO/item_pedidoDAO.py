@@ -1,4 +1,6 @@
 from terraycafe.model.sqlite.entity.item_pedido import Item_pedido   
+from typing import List
+
 
 class ItemPedidoDAO:
     def __init__(self, db_connection):

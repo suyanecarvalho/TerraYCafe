@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS Cliente (
 CREATE TABLE IF NOT EXISTS Ingredientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome varchar(255) NOT NULL,
-    tipo varchar(255) NOT NULL,
     preco_adicional float NOT NULL
 );
 

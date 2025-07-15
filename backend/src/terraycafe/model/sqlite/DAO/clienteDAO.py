@@ -4,13 +4,14 @@ class ClienteDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
         
-    def insert_cliente(self, nome: str, email: str, telefone: str, senha: str, ponto_fidelidade: int = 0) -> None:
+    def insert_cliente(self, nome: str, email: str, telefone: str, senha: str, ponto_fidelidade: int = 0) -> Cliente:
         with self.__db_connection as database:
             try:
                 cliente_data = Cliente(nome=nome, email=email, telefone=telefone, senha=senha, pontos_fidelidade=ponto_fidelidade)
                 database.add(cliente_data)
                 database.commit()
-                print(f"inseriu cliente: {cliente_data}")
+                print(f"Inseriu cliente: {cliente_data}")
+                return cliente_data
 
             except Exception as e:
                 database.rollback()

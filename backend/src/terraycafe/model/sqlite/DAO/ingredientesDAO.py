@@ -4,10 +4,10 @@ class IngredientesDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
 
-    def insert_ingrediente(self, nome: str, tipo: str, preco_adicional: float) -> None:
+    def insert_ingrediente(self, nome: str, preco_adicional: float) -> None:
         with self.__db_connection as database:
             try:
-                ingrediente_data = Ingredientes(nome=nome, tipo=tipo, preco_adicional=preco_adicional)
+                ingrediente_data = Ingredientes(nome=nome, preco_adicional=preco_adicional)
                 database.add(ingrediente_data)
                 database.commit()
                 print(f"Inseriu ingrediente: {ingrediente_data}")
@@ -30,13 +30,12 @@ class IngredientesDAO:
                 print(f"Erro ao buscar ingrediente: {e}")
                 raise e
     
-    def update_ingrediente(self, ingrediente_id: int, nome: str, tipo: str, preco_adicional: float) -> None:
+    def update_ingrediente(self, ingrediente_id: int, nome: str, preco_adicional: float) -> None:
         with self.__db_connection as database:
             try:
                 ingrediente = database.query(Ingredientes).filter(Ingredientes.id == ingrediente_id).first()
                 if ingrediente:
                     ingrediente.nome = nome
-                    ingrediente.tipo = tipo
                     ingrediente.preco_adicional = preco_adicional
                     database.commit()
                     print(f"Atualizou ingrediente: {ingrediente}")

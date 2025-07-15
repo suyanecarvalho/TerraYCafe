@@ -1,12 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Optional
-from pydantic import BaseModel 
 from sqlalchemy.orm import Session
 from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import List
-
-from terraycafe.model.sqlite.settings.connection import db_connection
+from terraycafe.model.sqlite.settings.connection import get_db
 from terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
 
 router = APIRouter(prefix="/orders", tags=["Pedidos"])
@@ -23,7 +20,7 @@ class PedidoCreateRequest(BaseModel):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connection)):
+def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(get_db)):
     try:
         pedido = PedidoBO(db).criar_pedido(
             cliente_id=request.cliente_id,
@@ -42,7 +39,7 @@ def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connecti
         raise HTTPException(status_code=500, detail=f"Erro ao criar pedido: {e}")
 
 @router.patch("/{pedido_id}/status")
-def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
+def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         PedidoBO(db).avancar_status(pedido_id)
         return {"message": f"Status do pedido {pedido_id} atualizado com sucesso"}
@@ -50,7 +47,7 @@ def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
         raise HTTPException(status_code=500, detail=f"Erro ao avançar status: {e}")
 
 @router.patch("/{pedido_id}")
-def cancelar_pedido(pedido_id: int, db: Session = Depends(db_connection)):
+def cancelar_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         PedidoBO(db).cancelar_pedido(pedido_id)
         return {"message": f"Pedido {pedido_id} cancelado com sucesso"}

@@ -2,6 +2,8 @@ from terraycafe.model.sqlite.entity.pedido import Pedidos
 from terraycafe.patterns.state.recebido_state import RecebidoState
 
 
+
+
 class PedidoDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection

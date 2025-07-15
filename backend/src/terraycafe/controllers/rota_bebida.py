@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
-
-from terraycafe.model.sqlite.settings.connection import db_connection
+from terraycafe.model.sqlite.settings.connection import get_db
 from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
 
 router = APIRouter(prefix="/drinks", tags=["Bebidas"])
@@ -16,7 +15,7 @@ class BebidaCreateRequest(BaseModel):
     preco_base: float
 
 @router.get("/", response_model=List[dict])
-def listar_bebidas(db: Session = Depends(db_connection)):
+def listar_bebidas(db: Session = Depends(get_db)):
     try:
         bebidas = BebidaDAO(db).get_all_bebidas()
         return [
@@ -34,7 +33,7 @@ def listar_bebidas(db: Session = Depends(db_connection)):
 
 
 @router.get("/{bebida_id}")
-def buscar_bebida(bebida_id: int, db: Session = Depends(db_connection)):
+def buscar_bebida(bebida_id: int, db: Session = Depends(get_db)):
     try:
         bebida = BebidaDAO(db).buscar_por_id(bebida_id)
         if bebida is None:
