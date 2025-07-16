@@ -1,6 +1,6 @@
 
-from backend.src.terraycafe.patterns.command.command_base import Command
-from backend.src.terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
+from terraycafe.patterns.command.command_base import Command
+from terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
 
 
 class CancelarPedido(Command):

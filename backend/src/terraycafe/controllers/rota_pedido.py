@@ -9,6 +9,7 @@ from terraycafe.patterns.command.fazer_pedido import FazerPedido
 from terraycafe.patterns.command.cancelar_pedido import CancelarPedido
 from terraycafe.patterns.command.invoker import Invoker
 from terraycafe.patterns.command.avancar_status_pedido import AvancarStatusPedido
+from terraycafe.model.sqlite.settings.connection import get_db
 
 router = APIRouter(prefix="/orders", tags=["Pedidos"])
 invoker = Invoker()
@@ -23,7 +24,7 @@ class PedidoCreateRequest(BaseModel):
     itens: List[ItemPedidoRequest] = Field(..., min_items=1)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connection)):
+def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         comando = FazerPedido(pedido_bo, {
@@ -46,7 +47,7 @@ def criar_pedido(request: PedidoCreateRequest, db: Session = Depends(db_connecti
 
 
 @router.patch("/{pedido_id}/status")
-def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
+def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         comando = AvancarStatusPedido(pedido_bo, pedido_id)
@@ -57,7 +58,7 @@ def avancar_status_pedido(pedido_id: int, db: Session = Depends(db_connection)):
 
 
 @router.patch("/{pedido_id}")
-def cancelar_pedido(pedido_id: int, db: Session = Depends(db_connection)):
+def cancelar_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         comando = CancelarPedido(pedido_bo, pedido_id)

@@ -1,5 +1,5 @@
 # Classe que invoca os comandos
-from backend.src.terraycafe.patterns.command.command_base import Command
+from terraycafe.patterns.command.command_base import Command
 
 
 class Invoker():
