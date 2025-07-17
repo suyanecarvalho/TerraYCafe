@@ -4,6 +4,7 @@ from terraycafe.model.sqlite.settings.connection import Base, db_connection
 from terraycafe.controllers.rota_cliente import router as cliente_router
 from terraycafe.controllers.rota_pedido import router as pedido_router
 from terraycafe.controllers.rota_ingrediente import router as ingrediente_router
+from terraycafe.controllers.rota_bebida import router as bebida_router
 
 app = FastAPI(title="TerrayCaféAPI")
 
@@ -28,5 +29,6 @@ except Exception as e:
     print(e)
 
 app.include_router(cliente_router)
-#app.include_router(pedido_router)
-#app.include_router(ingrediente_router)
+app.include_router(pedido_router)
+app.include_router(ingrediente_router)
+app.include_router(bebida_router)

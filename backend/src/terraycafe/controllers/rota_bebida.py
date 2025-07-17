@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List
 from terraycafe.model.sqlite.settings.connection import get_db
 from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
+from terraycafe.patterns.factory.fabricas import listar_tipos_bebidas_disponiveis, get_fabrica
 
 router = APIRouter(prefix="/drinks", tags=["Bebidas"])
 
@@ -47,3 +48,21 @@ def buscar_bebida(bebida_id: int, db: Session = Depends(get_db)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar bebida: {e}")
+
+@router.get("/fabricas", response_model=List[dict])
+def listar_fabricas():
+    try:
+        tipos = listar_tipos_bebidas_disponiveis()
+        bebidas_disponiveis = []
+        for tipo in tipos:
+            fabrica = get_fabrica(tipo)
+            bebida = fabrica.criar_bebida()
+            bebidas_disponiveis.append({
+                "nome": bebida.nome,
+                "descricao": bebida.descricao,
+                "categoria": bebida.categoria,
+                "preco_base": bebida.preco_base
+            })
+        return bebidas_disponiveis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

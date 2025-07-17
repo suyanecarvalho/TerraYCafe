@@ -90,3 +90,6 @@ _fabricas = {
 
 def get_fabrica(tipo: str) -> BebidaFactory | None:
     return _fabricas.get(tipo)
+
+def listar_tipos_bebidas_disponiveis() -> list[str]:
+    return list(_fabricas.keys())
