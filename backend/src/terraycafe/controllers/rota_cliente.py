@@ -5,12 +5,35 @@ from terraycafe.model.sqlite.settings.connection import db_connection
 from terraycafe.model.sqlite.BO.ClienteBO import ClienteBO
 from terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
 from sqlalchemy.orm import Session
+from jose import jwt, JWTError
+from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(prefix="/cliente", tags=["Cliente"])
+SECRET_KEY = "jbswq6387bd23b6d3b27@#@&dyg"
+ALGORITHM = "HS256"
+ACESS_TOKEN_EXPIRE_MINUTES = 60
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_db():
     db = db_connection
     return db
+
+def obter_usuario_atual(token: str = Depends(oauth2_scheme), dd=Depends(get_db)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        valor_sub = payload.get("sub")
+        if valor_sub is None:
+            raise ValueError("O campo 'sub' não está presente no payload.")
+        cliente_id = int(valor_sub)
+        if not cliente_id:
+            raise HTTPException(status_code=401, detail="Usuário não autenticado")
+        cliente = ClienteBO(dd).buscar_por_id(cliente_id)
+        if not cliente:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        return cliente
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
 
 @router.post("/register")
 def criar_cliente(payload: dict, db=Depends(get_db)):
@@ -37,33 +60,30 @@ def fazer_login(payload: dict, db=Depends(get_db)):
                 raise HTTPException(status_code=404, detail="Cliente não encontrado")
             elif resultado == "senha incorreta":
                 raise HTTPException(status_code=401, detail="Senha incorreta")
+            else:
+                raise HTTPException(status_code=400, detail="Erro desconhecido ao autenticar cliente")
         
+        # Gerar token JWT
+        token_data = {
+            "sub": str(resultado.id),
+            "exp": datetime.utcnow() + timedelta(minutes=ACESS_TOKEN_EXPIRE_MINUTES)
+        }
+        token_jwt = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+
         # Se chegou aqui, é um objeto cliente válido
         return {
-            "id": resultado.id,
-            "nome": resultado.nome,
-            "email": resultado.email,
-            "telefone": resultado.telefone,
-            "pontos_fidelidade": resultado.pontos_fidelidade
+            "acess_token": token_jwt,
+            "token_type": "bearer",
         }
+    
     except HTTPException:
         raise 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
 @router.get("/me")
-def obter_usuario_atual(db=Depends(get_db)):
-    """Endpoint para obter dados do usuário logado"""
-    # Por enquanto, vamos simular um usuário logado
-    # Em uma implementação real, você pegaria o ID do token JWT
+def obter_usuario_logado(cliente=Depends(obter_usuario_atual)):
     try:
-        # Simulando um usuário logado (você pode ajustar isso)
-        # Para teste, vamos buscar o primeiro cliente da base
-        cliente = ClienteBO(db).buscar_por_id(1)  # Temporário para teste
-        
-        if not cliente:
-            raise HTTPException(status_code=401, detail="Usuário não autenticado")
-        
         return {
             "id": cliente.id,
             "nome": cliente.nome,
