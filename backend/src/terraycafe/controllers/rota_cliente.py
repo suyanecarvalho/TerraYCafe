@@ -72,8 +72,15 @@ def fazer_login(payload: dict, db=Depends(get_db)):
 
         # Se chegou aqui, é um objeto cliente válido
         return {
-            "acess_token": token_jwt,
+            "access_token": token_jwt,
             "token_type": "bearer",
+            "user":{
+                "id": resultado.id,
+                "nome": resultado.nome,
+                "email":resultado.email,
+                "telefone": resultado.telefone,
+                "pontos_fidelidade":resultado.pontos_fidelidade
+            }
         }
     
     except HTTPException:

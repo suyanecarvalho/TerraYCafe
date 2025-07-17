@@ -6,7 +6,7 @@ from terraycafe.model.sqlite.settings.connection import get_db
 from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
 from terraycafe.patterns.factory.fabricas import listar_tipos_bebidas_disponiveis, get_fabrica
 
-router = APIRouter(prefix="/drinks", tags=["Bebidas"])
+router = APIRouter(prefix="/bebidas", tags=["Bebidas"])
 
 
 class BebidaCreateRequest(BaseModel):
@@ -14,24 +14,6 @@ class BebidaCreateRequest(BaseModel):
     descricao: str
     categoria: str
     preco_base: float
-
-@router.get("/", response_model=List[dict])
-def listar_bebidas(db: Session = Depends(get_db)):
-    try:
-        bebidas = BebidaDAO(db).get_all_bebidas()
-        return [
-            {
-                "id": b.id,
-                "nome": b.nome,
-                "descricao": b.descricao,
-                "categoria": b.categoria,
-                "preco_base": b.preco_base
-            }
-            for b in bebidas
-        ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao listar bebidas: {e}")
-
 
 @router.get("/{bebida_id}")
 def buscar_bebida(bebida_id: int, db: Session = Depends(get_db)):
@@ -49,7 +31,7 @@ def buscar_bebida(bebida_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar bebida: {e}")
 
-@router.get("/fabricas", response_model=List[dict])
+@router.get("/", response_model=List[dict])
 def listar_fabricas():
     try:
         tipos = listar_tipos_bebidas_disponiveis()
