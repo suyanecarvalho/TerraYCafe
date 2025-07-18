@@ -7,67 +7,195 @@ from terraycafe.model.sqlite.entity.bebida import (
 
 class CafeFactory(BebidaFactory):
     def criar_bebida(self) -> Cafe:
-        return Cafe()
+        return Cafe("Café", "Café tradicional", "Café", 5.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Café",
+            "descricao": "Café tradicional",
+            "categoria": "Café",
+            "preco_base": 5.0
+        }
 
 class ChaPretoFactory(BebidaFactory):
     def criar_bebida(self) -> ChaPreto:
-        return ChaPreto()
+        return ChaPreto("Chá Preto", "Chá preto tradicional", "Chá", 4.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chá Preto",
+            "descricao": "Chá preto tradicional",
+            "categoria": "Chá",
+            "preco_base": 4.0
+        }
 
 class CappuccinoFactory(BebidaFactory):
     def criar_bebida(self) -> Cappuccino:
-        return Cappuccino()
+        return Cappuccino("Cappuccino", "Cappuccino cremoso", "Cappuccino", 6.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Cappuccino",
+            "descricao": "Cappuccino cremoso",
+            "categoria": "Cappuccino",
+            "preco_base": 6.0
+        }
 
 class MochaFactory(BebidaFactory):
     def criar_bebida(self) -> Mocha:
-        return Mocha()
+        return Mocha("Mocha", "Café com chocolate", "Mocha", 6.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Mocha",
+            "descricao": "Café com chocolate",
+            "categoria": "Mocha",
+            "preco_base": 6.5
+        }
 
 class LimonadaFactory(BebidaFactory):
     def criar_bebida(self) -> Limonada:
-        return Limonada()
+        return Limonada("Limonada", "Limonada refrescante que realmente merecia um grammy", "Limonada", 4.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Limonada",
+            "descricao": "Limonada refrescante que realmente merecia um grammy",
+            "categoria": "Limonada",
+            "preco_base": 4.5
+        }
 
 class LatteFactory(BebidaFactory):
     def criar_bebida(self) -> Latte:
-        return Latte()
+        return Latte("Latte", "Café com leite vaporizado", "Latte", 6.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Latte",
+            "descricao": "Café com leite vaporizado",
+            "categoria": "Latte",
+            "preco_base": 6.0
+        }
 
 class AffogatoFactory(BebidaFactory):
     def criar_bebida(self) -> Affogato:
-        return Affogato()
+        return Affogato("Affogato", "Café com sorvete", "Affogato", 7.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Affogato",
+            "descricao": "Café com sorvete",
+            "categoria": "Affogato",
+            "preco_base": 7.0
+        }
 
 class ChaMatteFactory(BebidaFactory):
     def criar_bebida(self) -> ChaMatte:
-        return ChaMatte()
+        return ChaMatte("Chá Matte", "Chá mate gelado", "Chá", 4.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chá Matte",
+            "descricao": "Chá mate gelado",
+            "categoria": "Chá",
+            "preco_base": 4.5
+        }
 
 class ChaHibiscoFactory(BebidaFactory):
     def criar_bebida(self) -> ChaHibisco:
-        return ChaHibisco()
+        return ChaHibisco("Chá de Hibisco", "Chá de hibisco natural", "Chá", 5.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chá de Hibisco",
+            "descricao": "Chá de hibisco natural",
+            "categoria": "Chá",
+            "preco_base": 5.0
+        }
 
 class ExpressoFactory(BebidaFactory):
     def criar_bebida(self) -> Expresso:
-        return Expresso()
+        return Expresso("Expresso", "Say you can't sleep, baby, I know that's that me espresso. Café expresso curto", "Café", 4.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Expresso",
+            "descricao": "Say you can't sleep, baby, I know that's that me espresso. Café expresso curto",
+            "categoria": "Café",
+            "preco_base": 4.0
+        }
 
 class CafeAmericanoFactory(BebidaFactory):
     def criar_bebida(self) -> CafeAmericano:
-        return CafeAmericano()
+        return CafeAmericano("Café Americano", "there's nothing like this Miss Americana. Café expresso com água", "Café", 4.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Café Americano",
+            "descricao": "there's nothing like this Miss Americana. Café expresso com água",
+            "categoria": "Café",
+            "preco_base": 4.5
+        }
 
 class MatchaLatteFactory(BebidaFactory):
     def criar_bebida(self) -> MatchaLatte:
-        return MatchaLatte()
+        return MatchaLatte("Matcha Latte", "Chá verde com leite", "Chá", 7.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Matcha Latte",
+            "descricao": "Chá verde com leite",
+            "categoria": "Chá",
+            "preco_base": 7.0
+        }
 
 class ChaHortelaFactory(BebidaFactory):
     def criar_bebida(self) -> ChaHortela:
-        return ChaHortela()
+        return ChaHortela("Chá de Hortelã", "Chá de hortelã fresco", "Chá", 4.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chá de Hortelã",
+            "descricao": "Chá de hortelã fresco",
+            "categoria": "Chá",
+            "preco_base": 4.5
+        }
 
 class ChaGeladoFactory(BebidaFactory):
     def criar_bebida(self) -> ChaGelado:
-        return ChaGelado()
+        return ChaGelado("Chá Gelado", "Chá gelado com limão", "Chá", 4.5)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chá Gelado",
+            "descricao": "Chá gelado com limão",
+            "categoria": "Chá",
+            "preco_base": 4.5
+        }
 
 class FrappucinoFactory(BebidaFactory):
     def criar_bebida(self) -> Frappucino:
-        return Frappucino()
+        return Frappucino("Frappucino", "Bebida gelada de café", "Café", 8.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Frappucino",
+            "descricao": "Bebida gelada de café",
+            "categoria": "Café",
+            "preco_base": 8.0
+        }
 
 class ChocolateQuenteFactory(BebidaFactory):
     def criar_bebida(self) -> ChocolateQuente:
-        return ChocolateQuente()
+        return ChocolateQuente("Chocolate Quente", "Chocolate quente cremoso", "Chocolate Quente", 7.0)
+    
+    def info_bebida(self):
+        return {
+            "nome": "Chocolate Quente",
+            "descricao": "Chocolate quente cremoso",
+            "categoria": "Chocolate Quente",
+            "preco_base": 7.0
+        }
 
 _fabricas = {
     "Cafe": CafeFactory(),

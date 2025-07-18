@@ -6,5 +6,5 @@ class AvancarStatusPedido(Command):
         self.bo = bo
         self.pedido_id = pedido_id
 
-    def executa(self):
+    def executar(self):
         self.bo.avancar_status(self.pedido_id)

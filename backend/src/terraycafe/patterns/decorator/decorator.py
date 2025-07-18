@@ -56,6 +56,7 @@ class IngredienteDecorator(BebidaDecorator):
     def get_nome(self) -> str:
         return super().get_nome()
 
+
 def aplicar_personalizacoes(
     bebida_base: BebidaComponent,
     ingredientes_db: List[IngredienteDB],

@@ -77,3 +77,18 @@ class ItemPedidoDAO:
             except Exception as e:
                 print(f"Erro ao listar itens de pedido: {e}")
                 raise e
+    def delete_item_pedido(self, item_pedido_id: int) -> None:
+        """Remove um item de pedido por ID"""
+        with self.__db_connection as database:
+            try:
+                item_pedido = database.query(Item_pedido).filter(Item_pedido.id == item_pedido_id).first()
+                if item_pedido:
+                    database.delete(item_pedido)
+                    database.commit()
+                    print(f"Removeu item de pedido: {item_pedido}")
+                else:
+                    print(f"Item de pedido com ID {item_pedido_id} não encontrado.")
+            except Exception as e:
+                database.rollback()
+                print(f"Erro ao remover item de pedido: {e}")
+                raise e

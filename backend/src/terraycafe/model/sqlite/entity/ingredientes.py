@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Float,Integer
 from sqlalchemy import String
-
 from terraycafe.model.sqlite.settings.connection import Base
 
 class Ingredientes(Base):

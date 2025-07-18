@@ -43,6 +43,7 @@ def criar_cliente(payload: dict, db=Depends(get_db)):
             "id": cliente.id,
             "nome": cliente.nome,
             "email": cliente.email,
+            "senha": cliente.senha,
             "telefone": cliente.telefone,
             "pontos_fidelidade": cliente.pontos_fidelidade
         }
@@ -78,6 +79,7 @@ def fazer_login(payload: dict, db=Depends(get_db)):
                 "id": resultado.id,
                 "nome": resultado.nome,
                 "email":resultado.email,
+                "senha": resultado.senha,
                 "telefone": resultado.telefone,
                 "pontos_fidelidade":resultado.pontos_fidelidade
             }

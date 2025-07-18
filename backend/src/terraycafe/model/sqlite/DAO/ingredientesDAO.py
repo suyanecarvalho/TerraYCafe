@@ -1,5 +1,6 @@
 from terraycafe.model.sqlite.entity.ingredientes import Ingredientes
 
+
 class IngredientesDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection

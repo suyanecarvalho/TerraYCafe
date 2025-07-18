@@ -26,6 +26,10 @@ click==8.2.1
     # via rich-toolkit
     # via typer
     # via uvicorn
+colorama==0.4.6
+    # via click
+    # via pytest
+    # via uvicorn
 distlib==0.3.9
     # via virtualenv
 dnspython==2.7.0
@@ -145,8 +149,6 @@ uvicorn==0.34.3
     # via fastapi-cli
     # via fastapi-cloud-cli
     # via terraycafe
-uvloop==0.21.0
-    # via uvicorn
 virtualenv==20.31.2
     # via pre-commit
 watchfiles==1.1.0

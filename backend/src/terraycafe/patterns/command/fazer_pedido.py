@@ -7,7 +7,7 @@ class FazerPedido(Command):
         self.dados_pedido = dados_pedido
         self.id_pedido = None
     
-    def executa(self):
-        self.id_pedido = self.bo.fazer_pedido(self.dados_pedido)
+    def executar(self):
+        self.id_pedido = self.bo.finalizar_pedido(self.dados_pedido)
         return self.id_pedido
         

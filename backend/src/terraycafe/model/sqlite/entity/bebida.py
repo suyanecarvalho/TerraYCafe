@@ -32,82 +32,67 @@ class Bebida(Base):
     def get_preco(self):
         return self.preco_base
 
+# Classes específicas de bebida para o padrão Factory
 class Cafe(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Café", descricao="Café tradicional", categoria="Café", preco_base=5.0)
+    def __init__(self, nome="Café", descricao="Café tradicional", categoria="Café", preco_base=5.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChaPreto(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chá Preto", descricao="Chá preto tradicional", categoria="Chá", preco_base=4.0)
+    def __init__(self, nome="Chá Preto", descricao="Chá preto tradicional", categoria="Chá", preco_base=4.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Cappuccino(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Cappuccino", descricao="Cappuccino cremoso", categoria="Cappuccino", preco_base=6.0)
+    def __init__(self, nome="Cappuccino", descricao="Cappuccino cremoso", categoria="Cappuccino", preco_base=6.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Mocha(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Mocha", descricao="Café com chocolate", categoria="Mocha", preco_base=6.5)
+    def __init__(self, nome="Mocha", descricao="Café com chocolate", categoria="Mocha", preco_base=6.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Limonada(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Limonada", descricao="Limonada refrescante que realmente merecia um grammy", categoria="Limonada", preco_base=4.5)
+    def __init__(self, nome="Limonada", descricao="Limonada refrescante que realmente merecia um grammy", categoria="Limonada", preco_base=4.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Latte(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Latte", descricao="Café com leite vaporizado", categoria="Latte", preco_base=6.0)
+    def __init__(self, nome="Latte", descricao="Café com leite vaporizado", categoria="Latte", preco_base=6.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Affogato(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Affogato", descricao="Café com sorvete", categoria="Affogato", preco_base=7.0)
+    def __init__(self, nome="Affogato", descricao="Café com sorvete", categoria="Affogato", preco_base=7.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChaMatte(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chá Matte", descricao="Chá mate gelado", categoria="Chá", preco_base=4.5)
+    def __init__(self, nome="Chá Matte", descricao="Chá mate gelado", categoria="Chá", preco_base=4.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChaHibisco(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chá de Hibisco", descricao="Chá de hibisco natural", categoria="Chá", preco_base=5.0)
+    def __init__(self, nome="Chá de Hibisco", descricao="Chá de hibisco natural", categoria="Chá", preco_base=5.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Expresso(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Expresso", descricao="Say you can't sleep, baby, I know that's that me espresso. Café expresso curto", categoria="Café", preco_base=4.0)
+    def __init__(self, nome="Expresso", descricao="Say you can't sleep, baby, I know that's that me espresso. Café expresso curto", categoria="Café", preco_base=4.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class CafeAmericano(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Café Americano", descricao="there's nothing like this Miss Americana. Café expresso com água", categoria="Café", preco_base=4.5)
+    def __init__(self, nome="Café Americano", descricao="there's nothing like this Miss Americana. Café expresso com água", categoria="Café", preco_base=4.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class MatchaLatte(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Matcha Latte", descricao="Chá verde com leite", categoria="Chá", preco_base=7.0)
+    def __init__(self, nome="Matcha Latte", descricao="Chá verde com leite", categoria="Chá", preco_base=7.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChaHortela(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chá de Hortelã", descricao="Chá de hortelã fresco", categoria="Chá", preco_base=4.5)
+    def __init__(self, nome="Chá de Hortelã", descricao="Chá de hortelã fresco", categoria="Chá", preco_base=4.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChaGelado(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chá Gelado", descricao="Chá gelado com limão", categoria="Chá", preco_base=4.5)
+    def __init__(self, nome="Chá Gelado", descricao="Chá gelado com limão", categoria="Chá", preco_base=4.5):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class Frappucino(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Frappucino", descricao="Bebida gelada de café", categoria="Café", preco_base=8.0)
+    def __init__(self, nome="Frappucino", descricao="Bebida gelada de café", categoria="Café", preco_base=8.0):
+        super().__init__(nome, descricao, categoria, preco_base)
 
 class ChocolateQuente(Bebida):
-    @classmethod
-    def criar(cls):
-        return cls(nome="Chocolate Quente", descricao="Chocolate quente cremoso", categoria="Chocolate Quente", preco_base=7.0)
+    def __init__(self, nome="Chocolate Quente", descricao="Chocolate quente cremoso", categoria="Chocolate Quente", preco_base=7.0):
+        super().__init__(nome, descricao, categoria, preco_base)

@@ -1,3 +1,4 @@
+from typing import List
 from terraycafe.model.sqlite.entity.personalizacao import Personalizacao
 
 
@@ -63,6 +64,48 @@ class PersonalizacaoDAO:
                 database.rollback()
                 print(f"Erro ao deletar personalização: {e}")
                 raise e
+
+    def delete_por_item_pedido(self, item_pedido_id: int) -> int:
+            """Remove todas as personalizações de um item de pedido específico"""
+            with self.__db_connection as database:
+                try:
+                    # Buscar todas as personalizações do item
+                    personalizacoes = database.query(Personalizacao).filter(
+                        Personalizacao.item_pedido_id == item_pedido_id
+                    ).all()
+                    
+                    quantidade_removida = len(personalizacoes)
+                    
+                    # Remover todas as personalizações encontradas
+                    for personalizacao in personalizacoes:
+                        database.delete(personalizacao)
+                    
+                    database.commit()
+                    print(f"Removeu {quantidade_removida} personalizações do item de pedido {item_pedido_id}")
+                    return quantidade_removida
+                    
+                except Exception as e:
+                    database.rollback()
+                    print(f"Erro ao remover personalizações do item de pedido: {e}")
+                    raise e
+                
+    def listar_por_item_pedido(self, item_pedido_id: int) -> List[Personalizacao]:
+            """Lista todas as personalizações de um item de pedido"""
+            with self.__db_connection as database:
+                try:
+                    personalizacoes = database.query(Personalizacao).filter(
+                        Personalizacao.item_pedido_id == item_pedido_id
+                    ).all()
+                    
+                    if personalizacoes:
+                        return personalizacoes
+                    else:
+                        print(f"Nenhuma personalização encontrada para o item de pedido com ID {item_pedido_id}.")
+                        return []
+                except Exception as e:
+                    print(f"Erro ao listar personalizações: {e}")
+                    raise e
+
             
     def listar_por_item_pedido(self, item_pedido_id: int):
         with self.__db_connection as database:

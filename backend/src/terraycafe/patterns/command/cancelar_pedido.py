@@ -9,7 +9,7 @@ class CancelarPedido(Command):
         self.dados_pedido = dados_pedido
         self.id_pedido = None
     
-    def executa(self):
+    def executar(self):
         return self.bo.cancelar_pedido(self.dados_pedido)
         
     

@@ -24,6 +24,10 @@ click==8.2.1
     # via rich-toolkit
     # via typer
     # via uvicorn
+colorama==0.4.6
+    # via click
+    # via pytest
+    # via uvicorn
 dnspython==2.7.0
     # via email-validator
 ecdsa==0.19.1
@@ -131,8 +135,6 @@ uvicorn==0.34.3
     # via fastapi-cli
     # via fastapi-cloud-cli
     # via terraycafe
-uvloop==0.21.0
-    # via uvicorn
 watchfiles==1.1.0
     # via uvicorn
 websockets==15.0.1
