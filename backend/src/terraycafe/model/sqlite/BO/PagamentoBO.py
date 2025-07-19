@@ -1,5 +1,5 @@
-from src.terraycafe.patterns.strategy import desconto_strategy
-from src.terraycafe.patterns.strategy.desconto_strategy import DescontoFidelidade,DescontoPix,SemDesconto
+from terraycafe.patterns.strategy import desconto_strategy
+from terraycafe.patterns.strategy.desconto_strategy import DescontoFidelidade,DescontoPix,SemDesconto
 
 #interface de interacao com o cliente
 class PagamentoContext:

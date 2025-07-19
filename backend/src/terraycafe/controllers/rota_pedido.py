@@ -97,32 +97,6 @@ def listar_todos_pedidos(client_id: id, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao listar pedidos: {e}")
 
-@router.get("/{pedido_id}")
-def buscar_pedido(pedido_id: int, db: Session = Depends(get_db)):
-    try:
-        if pedido_id <= 0:
-            raise HTTPException(status_code=400, detail="ID do pedido inválido")
-
-        pedido_bo = PedidoBO(db)
-        pedido = pedido_bo.dao.buscar_por_id(pedido_id)
-
-        if not pedido:
-            raise HTTPException(status_code=404, detail="Pedido não encontrado")
-
-        return {
-            "id": pedido.id,
-            "status": pedido.status,
-            "valor_total": pedido.valor_total,
-            "forma_pagamento": pedido.forma_pagamento,
-            "desconto": pedido.desconto,
-            "data_hora": pedido.data_hora,
-            "cliente_id": pedido.cliente_id
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar pedido: {e}")
-
 @router.post("/criar")
 async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
     try:

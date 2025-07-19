@@ -5,16 +5,6 @@ from terraycafe.websocket.conexao import gerenciador_websocket
 import json
 
 router = APIRouter(prefix="/ws", tags=["WebSocket"])
-
-# @router.websocket("/")
-# async def websocket_endpoint(websocket: WebSocket):
-#     await gerenciador_websocket.conectar(websocket)
-#     try:  
-#         while True:
-#             await websocket.receive_text()  # Mantém conexão viva
-#     except WebSocketDisconnect:
-#         gerenciador_websocket.desconectar(websocket)
-
 @router.websocket("/cliente/{id_cliente}")
 async def websocket_cliente(websocket: WebSocket, id_cliente: int, token: str = Query(None)):
     # Validação do token JWT

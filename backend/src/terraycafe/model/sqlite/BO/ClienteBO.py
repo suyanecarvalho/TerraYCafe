@@ -1,4 +1,4 @@
-from src.terraycafe.model.sqlite.DAO.clienteDAO import ClienteDAO
+from terraycafe.model.sqlite.DAO.clienteDAO import ClienteDAO
 
 class ClienteBO:
     def __init__(self, db_connection):
