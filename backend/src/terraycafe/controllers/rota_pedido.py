@@ -75,7 +75,7 @@ def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db
 
 
 @router.get("/")
-def listar_todos_pedidos(client_id: id, db: Session = Depends(get_db)):
+def listar_todos_pedidos(db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         pedidos = pedido_bo.dao.listar_todos()
@@ -88,7 +88,7 @@ def listar_todos_pedidos(client_id: id, db: Session = Depends(get_db)):
                 "forma_pagamento": p.forma_pagamento,
                 "desconto": p.desconto,
                 "data_hora": p.data_hora,
-                "cliente_id": p.Cliente_id
+                "cliente_id": p.cliente_id
             }
             for p in pedidos
         ]
