@@ -4,14 +4,13 @@ class BebidaDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
 
-    def insert_bebida(self, nome: str, descricao: str, preco_base: float, categoria: str) -> None:
+    def insert_bebida(self, nome: str, descricao: str, preco_base: float) -> None:
         with self.__db_connection as database:
             try:
                 bebida_data = Bebida(
                     nome=nome,
                     descricao=descricao,
                     preco_base=preco_base,
-                    categoria=categoria
                 )
                 database.add(bebida_data)
                 database.commit()
@@ -34,7 +33,7 @@ class BebidaDAO:
                 print(f"Erro ao buscar bebida: {e}")
                 raise e
             
-    def update_bebida(self, bebida_id: int, nome: str, descricao: str, preco_base: float, categoria: str) -> None:
+    def update_bebida(self, bebida_id: int, nome: str, descricao: str, preco_base: float) -> None:
         with self.__db_connection as database:
             try:
                 bebida = database.query(Bebida).filter(Bebida.id == bebida_id).first()
@@ -42,7 +41,6 @@ class BebidaDAO:
                     bebida.nome = nome
                     bebida.descricao = descricao
                     bebida.preco_base = preco_base
-                    bebida.categoria = categoria
                     database.commit()
                     print(f"Atualizou bebida: {bebida}")
                 else:

@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS Bebida (
     nome varchar(255) NOT NULL,
     descricao varchar(255) NOT NULL,
     preco_base float NOT NULL,
-    categoria varchar(255) NOT NULL
 );
 
 -- Table: Cliente

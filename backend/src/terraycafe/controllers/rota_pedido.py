@@ -31,6 +31,11 @@ class SimulacaoPagamentoRequest(BaseModel):
     itens: List[ItemCarrinho]
     forma_pagamento: str
 
+class PedidoRequest(BaseModel):
+    cliente_id: int
+    itens: List[ItemCarrinho]
+    forma_pagamento: str
+
 
 @router.patch("/{pedido_id}/status")
 def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
@@ -145,3 +150,16 @@ def buscar_pedido(pedido_id: int, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao buscar pedido: {e}")
+
+@router.post("/criar")
+async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
+    try:
+        pedido_bo = PedidoBO(db)
+        novo_pedido = await pedido_bo.finalizar_pedido(
+            cliente_id=request.cliente_id,
+            itens=request.itens,
+            forma_pagamento=request.forma_pagamento
+        )
+        return {"pedido_id": novo_pedido.id, "message": "Pedido criado com sucesso"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao criar pedido: {e}")

@@ -12,7 +12,6 @@ router = APIRouter(prefix="/bebidas", tags=["Bebidas"])
 class BebidaCreateRequest(BaseModel):
     nome: str
     descricao: str
-    categoria: str
     preco_base: float
 
 @router.post("/")
@@ -22,7 +21,6 @@ def criar_bebida(request: BebidaCreateRequest, db: Session = Depends(get_db)):
             nome=request.nome,
             descricao=request.descricao,
             preco_base=request.preco_base,
-            categoria=request.categoria
         )
         return {"message": "Bebida criada com sucesso"}
     except Exception as e:
@@ -55,7 +53,6 @@ def listar_bebidas_banco(db: Session = Depends(get_db)):
                 "id": bebida.id,
                 "nome": bebida.nome,
                 "descricao": bebida.descricao,
-                "categoria": bebida.categoria,
                 "preco_base": bebida.preco_base
             })
         return bebidas_banco
@@ -72,7 +69,6 @@ def buscar_bebida(bebida_id: int, db: Session = Depends(get_db)):
             "id": bebida.id,
             "nome": bebida.nome,
             "descricao": bebida.descricao,
-            "categoria": bebida.categoria,
             "preco_base": bebida.preco_base
         }
     except Exception as e:

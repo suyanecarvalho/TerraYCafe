@@ -5,6 +5,7 @@ from terraycafe.controllers.rota_cliente import router as cliente_router
 from terraycafe.controllers.rota_pedido import router as pedido_router
 from terraycafe.controllers.rota_ingrediente import router as ingrediente_router
 from terraycafe.controllers.rota_bebida import router as bebida_router
+from terraycafe.controllers.rota_websocket import router as websocket_router
 
 app = FastAPI(title="TerrayCaféAPI")
 
@@ -34,3 +35,4 @@ app.include_router(cliente_router)
 app.include_router(pedido_router)
 app.include_router(ingrediente_router)
 app.include_router(bebida_router)
+app.include_router(websocket_router)
