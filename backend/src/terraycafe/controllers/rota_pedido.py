@@ -56,22 +56,7 @@ def cancelar_pedido(pedido_id: int, db: Session = Depends(get_db)):
         return {"message": f"Pedido {pedido_id} cancelado com sucesso"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao cancelar pedido: {e}")
-@router.patch("/{pedido_id}/alterar")
-def alterar_pedido(pedido_id: int, request: dict, db: Session = Depends(get_db)):
-    """Altera um pedido existente (apenas se status for 'Recebido')"""
-    try:
-        pedido_bo = PedidoBO(db)
-        
 
-        comando = AlterarPedido(pedido_bo, pedido_id, request)
-        invoker.executar(comando)
-        
-        return {"message": f"Pedido {pedido_id} alterado com sucesso"}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao alterar pedido: {e}")
-    
 @router.post("/bebida/preparar")
 def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db)):
     try:
@@ -88,22 +73,9 @@ def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db
         raise HTTPException(status_code=500, detail=f"Erro ao preparar bebida: {e}")
 
 
-@router.get("/cliente/{cliente_id}")
-def listar_pedidos_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    try:
-        if cliente_id <= 0:
-            raise HTTPException(status_code=400, detail="ID do cliente inválido")
-        
-        pedido_bo = PedidoBO(db)
-        pedidos = pedido_bo.listar_pedidos_por_cliente(cliente_id)
-        return {"pedidos": pedidos}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao listar pedidos: {e}")
 
 @router.get("/")
-def listar_todos_pedidos(db: Session = Depends(get_db)):
+def listar_todos_pedidos(client_id: id, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         pedidos = pedido_bo.dao.listar_todos()

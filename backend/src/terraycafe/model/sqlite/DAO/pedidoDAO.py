@@ -93,3 +93,13 @@ class PedidoDAO:
             except Exception as e:
                 database.rollback()
                 raise e
+         
+    
+    def listar_todos(self) -> list[Pedidos]:  
+        with self.__db_connection as database:
+            try:
+                pedidos = database.query(Pedidos).all()
+                return pedidos
+            except Exception as e:
+                print(f"Erro ao listar pedidos: {e}")
+                raise e
