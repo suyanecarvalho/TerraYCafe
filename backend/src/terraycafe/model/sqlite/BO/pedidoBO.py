@@ -260,7 +260,7 @@ class PedidoBO:
             return
 
         pedido.set_estado(CanceladoState())
-        self.dao.atualizar(pedido.id,pedido.status)
+        self.dao.atualizar(pedido.id,pedido.status,pedido.valor_total, pedido.forma_pagamento, pedido.desconto, pedido.data_hora, pedido.cliente_id)
         pedido.notificar_observadores()
         print("Pedido cancelado com sucesso.")
 
