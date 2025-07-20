@@ -135,7 +135,7 @@ class PedidoBO:
         if pedido:
             pedido.adicionar_observador(self.websocket_observer)  # Adiciona o observer websocket
             pedido.avancar_estado()
-            self.dao.atualizar(pedido.id, pedido.status)
+            self.dao.atualizar(pedido.id,pedido.status,pedido.valor_total, pedido.forma_pagamento, pedido.desconto, pedido.data_hora, pedido.cliente_id)
             await pedido.notificar_observadores((pedido.id, pedido.status))  # Notifica todos observers
 
 

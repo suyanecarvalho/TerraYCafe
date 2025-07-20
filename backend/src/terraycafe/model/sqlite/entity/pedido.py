@@ -1,4 +1,6 @@
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import reconstructor
+from terraycafe.patterns.state.estado_em_preparo import EmPreparoState
 from terraycafe.patterns.state.recebido_state import RecebidoState
 from terraycafe.model.sqlite.settings.connection import Base
 from terraycafe.patterns.observer.cliente_observer import ClienteObserver
@@ -16,7 +18,23 @@ class Pedidos(Base):
     desconto = Column(Integer, nullable=False)
     data_hora = Column(DateTime, nullable=False)
     cliente_id = Column(Integer, ForeignKey('cliente.id'))
-
+    
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Inicializa o estado como RecebidoState ou conforme o status
+            self.estado = RecebidoState()
+            
+    @reconstructor
+    def init_on_load(self):
+        # Inicializa o estado conforme o status do pedido
+        if self.status == "Recebido":
+            self.estado = RecebidoState()
+        # Adicione outros estados conforme necessário
+        elif self.status == "Em Preparo":
+            self.estado = EmPreparoState()
+        else:
+            self.estado = RecebidoState()
+            
     def __repr__(self) -> str:
         return (
             f"<Pedidos(id={self.id}, status='{self.status}', valor_total={self.valor_total}, "
@@ -30,11 +48,11 @@ class Pedidos(Base):
             self.observadores = []
         self.observadores.append(obs)
 
-    def notificar_observadores(self):
+    async def notificar_observadores(self, pedido_id=None, status=None):
         if hasattr(self, "observadores"):
             for obs in self.observadores:
-                obs.atualizar(self.id, self.status)
-    
+                await obs.atualizar(pedido_id or self.id, status or self.status)
+
     def registrar_observadores(self):
         self.adicionar_observador(ClienteObserver())
         self.adicionar_observador(CozinhaObserver())

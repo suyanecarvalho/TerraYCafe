@@ -6,7 +6,8 @@ class Invoker():
     def __init__(self):
         self.historico = []
 
-    def executar(self, comando: Command):
-        resultado = comando.executar()
+    async def executar(self, comando: Command):
+        resultado = await comando.executar()
         self.historico.append(comando)
         return resultado
+    

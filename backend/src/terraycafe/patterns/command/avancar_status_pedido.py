@@ -6,5 +6,5 @@ class AvancarStatusPedido(Command):
         self.bo = bo
         self.pedido_id = pedido_id
 
-    def executar(self):
-        self.bo.avancar_status(self.pedido_id)
+    async def executar(self):
+        await self.bo.avancar_status(self.pedido_id)

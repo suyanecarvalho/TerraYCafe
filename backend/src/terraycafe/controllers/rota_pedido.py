@@ -39,11 +39,11 @@ class PedidoRequest(BaseModel):
 
 
 @router.patch("/{pedido_id}/status")
-def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
+async def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         comando = AvancarStatusPedido(pedido_bo, pedido_id)
-        invoker.executar(comando)
+        await invoker.executar(comando)
         return {"message": f"Status do pedido {pedido_id} atualizado com sucesso"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao avançar status: {e}")
