@@ -11,6 +11,7 @@ from terraycafe.model.sqlite.DAO.item_pedidoDAO import ItemPedidoDAO
 from terraycafe.model.sqlite.DAO.personalizacaoDAO import PersonalizacaoDAO
 from terraycafe.model.sqlite.DAO.ingredientesDAO import IngredientesDAO
 from terraycafe.service.pedido_temp_service import PedidoTempService
+from terraycafe.model.sqlite.entity.bebida import Bebida
 from sqlalchemy.orm import Session
 
     
@@ -46,14 +47,27 @@ class PedidoBO:
             ingredientes_aplicados = [i.id for i in ingredientes_objs]
 
         preco = bebida.get_preco()
+        nome = bebida.get_nome()
+        descricao = bebida.get_descricao()
+
+        # 🎯 Criação da bebida no banco
+        nova_bebida = Bebida(
+            nome=nome,
+            descricao=descricao,
+            preco_base=preco  # ← aqui foi o ajuste principal
+        )
+        db.add(nova_bebida)
+        db.commit()
+        db.refresh(nova_bebida)  # pega o ID gerado
 
         return {
-            "nome": bebida.get_nome(),
-            "descricao": bebida.get_descricao(),
-            "preco": preco,
-            "tipo_bebida": tipo_bebida,
+            "id": nova_bebida.id,
+            "nome": nova_bebida.nome,
+            "descricao": nova_bebida.descricao,
+            "preco": nova_bebida.preco_base, 
             "ingredientes": ingredientes_aplicados
         }
+
 
 
     async def finalizar_pedido(self, cliente_id: int, forma_pagamento: str) -> Pedidos:
