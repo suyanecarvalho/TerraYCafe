@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+
 from terraycafe.model.sqlite.settings.connection import get_db
 from terraycafe.model.sqlite.BO.pedidoBO import PedidoBO
 from terraycafe.patterns.command.alterar_pedido import AlterarPedido
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 invoker = Invoker()
 
 class PrepararBebidaRequest(BaseModel):
+    cliente_id: int
     tipo_bebida: str
     ingredientes: Optional[List[int]] = []
 
@@ -33,7 +35,6 @@ class SimulacaoPagamentoRequest(BaseModel):
 
 class PedidoRequest(BaseModel):
     cliente_id: int
-    itens: List[ItemCarrinho]
     forma_pagamento: str
 
 
@@ -62,16 +63,19 @@ def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db
     try:
         pedido_bo = PedidoBO(db)
         resultado = pedido_bo.preparar_bebida(
+            cliente_id=request.cliente_id,  
             tipo_bebida=request.tipo_bebida,
             ingredientes=request.ingredientes,
             db=db
         )
+        pedido_bo.pedido_temp_service.adicionar_bebida_temp(request.cliente_id, resultado)
+
         return resultado
+
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao preparar bebida: {e}")
-
 
 
 @router.get("/")
@@ -103,9 +107,11 @@ async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
         pedido_bo = PedidoBO(db)
         novo_pedido = await pedido_bo.finalizar_pedido(
             cliente_id=request.cliente_id,
-            itens=request.itens,
             forma_pagamento=request.forma_pagamento
         )
-        return {"pedido_id": novo_pedido.id, "message": "Pedido criado com sucesso"}
+        return {
+            "pedido_id": novo_pedido.id,
+            "message": "Pedido criado com sucesso"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao criar pedido: {e}")
