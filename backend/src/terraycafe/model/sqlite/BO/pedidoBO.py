@@ -10,7 +10,7 @@ from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO
 from terraycafe.model.sqlite.DAO.item_pedidoDAO import ItemPedidoDAO
 from terraycafe.model.sqlite.DAO.personalizacaoDAO import PersonalizacaoDAO
 from terraycafe.model.sqlite.DAO.ingredientesDAO import IngredientesDAO
-from terraycafe.service.pedido_temp_service import PedidoTempService
+from terraycafe.service.pedido_temp_service import pedido_temp_service_global
 from terraycafe.model.sqlite.entity.bebida import Bebida
 from sqlalchemy.orm import Session
 
@@ -23,7 +23,7 @@ class PedidoBO:
         self.personalizacao_dao = PersonalizacaoDAO(db_connection)
         self.ingredientes_dao = IngredientesDAO(db_connection)
         self.websocket_observer = WebSocketObserver()
-        self.pedido_temp_service = PedidoTempService()
+        self.pedido_temp_service = pedido_temp_service_global
 
     def preparar_bebida(self, cliente_id: int, tipo_bebida: str, ingredientes: list[int] | None, db: Session) -> dict:
         fabrica = get_fabrica(tipo_bebida)
@@ -77,71 +77,82 @@ class PedidoBO:
         if not bebidas_temp:
             raise ValueError("Nenhuma bebida preparada para este cliente.")
 
-        # Cria o pedido principal
-        pedido = Pedidos(
-            status="Recebido",
-            valor_total=0.0,
-            forma_pagamento=forma_pagamento,
-            desconto=0,
-            data_hora=datetime.now(),
-            cliente_id=cliente_id
-        )
-
-        # Calcula valor total bruto com base nas bebidas temporárias
-        valor_bruto_total = sum(b["preco"] for b in bebidas_temp)
-        pagamento = PagamentoContext(forma_pagamento)
-        resultado_pagamento = pagamento.processar_pagamento(valor_bruto_total)
-
-        pedido.valor_total = resultado_pagamento["valor_final"]
-        pedido.desconto = int(resultado_pagamento["desconto"])
-        pedido.forma_pagamento = resultado_pagamento["tipo_pagamento"]
-
-        # Salva o pedido no banco
-        self.dao.salvar(pedido)
-
-        # Para cada bebida preparada, salva no banco e vincula ao pedido
-        for bebida_temp in bebidas_temp:
-            bebida_db = self.bebida_dao.insert_bebida(
-                nome=bebida_temp["nome"],
-                descricao=bebida_temp["descricao"],
-                preco_base=bebida_temp["preco"]
+        try:
+            pedido = Pedidos(
+                status="Recebido",
+                valor_total=0.0,
+                forma_pagamento=forma_pagamento,
+                desconto=0,
+                data_hora=datetime.now(),
+                cliente_id=cliente_id
             )
+            print("Criando pedido:", pedido)
 
-            item_pedido = self.item_pedido_dao.insert_item_pedido(
-                pedido_id=pedido.id,
-                preco=bebida_temp["preco"],
-                bebida_id=bebida_db.id
-            )
+            valor_bruto_total = sum(b["preco"] for b in bebidas_temp)
+            pagamento = PagamentoContext(forma_pagamento)
+            resultado_pagamento = pagamento.processar_pagamento(valor_bruto_total)
 
-            for ingrediente_id in bebida_temp.get("ingredientes", []):
-                self.personalizacao_dao.insert_personalizacao(
-                    item_pedido_id=item_pedido.id,
-                    ingredientes_id=ingrediente_id
+            pedido.valor_total = resultado_pagamento["valor_final"]
+            pedido.desconto = int(resultado_pagamento["desconto"])
+            pedido.forma_pagamento = resultado_pagamento["tipo_pagamento"]
+
+            self.dao.salvar(pedido)
+            print("Pedido salvo:", pedido)
+
+            for bebida_temp in bebidas_temp:
+                print("Processando bebida:", bebida_temp)
+                # Se já existe bebida no banco, busque pelo nome/descricao/preco
+                bebida_db = self.bebida_dao.buscar_por_nome_descricao_preco(
+                    nome=bebida_temp["nome"],
+                    descricao=bebida_temp["descricao"],
+                    preco_base=bebida_temp["preco"]
                 )
+                if not bebida_db:
+                    bebida_db = self.bebida_dao.insert_bebida(
+                        nome=bebida_temp["nome"],
+                        descricao=bebida_temp["descricao"],
+                        preco_base=bebida_temp["preco"]
+                    )
+                print("Bebida salva:", bebida_db)
 
-        # Limpa bebidas temporárias do cliente após finalizar
-        self.pedido_temp_service.limpar_bebidas_temp(cliente_id)
+                item_pedido = self.item_pedido_dao.insert_item_pedido(
+                    pedido_id=pedido.id,
+                    preco=bebida_temp["preco"],
+                    bebida_id=bebida_db.id
+                )
+                print("Item pedido salvo:", item_pedido)
 
-        # Notifica via WebSocket
-        pedido.registrar_observadores()
-        pedido.adicionar_observador(self.websocket_observer)
-        await pedido.notificar_observadores((pedido.id, pedido.status))
+                for ingrediente_id in bebida_temp.get("ingredientes", []):
+                    print("Inserindo personalização:", ingrediente_id)
+                    self.personalizacao_dao.insert_personalizacao(
+                        item_pedido_id=item_pedido.id,
+                        ingredientes_id=ingrediente_id
+                    )
 
-        return pedido
+            self.pedido_temp_service.limpar_bebidas_temp(cliente_id)
 
+            pedido.registrar_observadores()
+            pedido.adicionar_observador(self.websocket_observer)
+            await pedido.notificar_observadores(pedido.id, pedido.status)
+
+            return pedido
+
+        except Exception as e:
+            print("Erro interno ao finalizar pedido:", e)
+            raise
 
     async def avancar_status(self, pedido_id: int):
         pedido = self.dao.buscar_por_id(pedido_id)
         if pedido:
             pedido.adicionar_observador(self.websocket_observer)  # Adiciona o observer websocket
-            pedido.avancar_estado()
+            await pedido.avancar_estado()
             self.dao.atualizar(pedido.id,pedido.status,pedido.valor_total, pedido.forma_pagamento, pedido.desconto, pedido.data_hora, pedido.cliente_id)
             await pedido.notificar_observadores((pedido.id, pedido.status))  # Notifica todos observers
 
 
 # ...existing code...
 
-    def alterar_pedido(self, pedido_id: int, novos_dados: dict) -> Pedidos:
+    async def alterar_pedido(self, pedido_id: int, novos_dados: dict) -> Pedidos:
         """
         Altera um pedido existente se ele estiver no status 'Recebido'
         """
@@ -244,7 +255,7 @@ class PedidoBO:
             self.dao.salvar(pedido)
             
             # Notificar observadores sobre a alteração
-            pedido.notificar_observadores()
+            await pedido.notificar_observadores()
             
             return pedido
             
@@ -263,7 +274,7 @@ class PedidoBO:
         """
         return self.dao.buscar_por_id(pedido_id)
 
-    def cancelar_pedido(self, pedido_id: int):
+    async def cancelar_pedido(self, pedido_id: int):
         pedido = self.dao.buscar_por_id(pedido_id)
         if not pedido:
             print("Pedido não encontrado.")
@@ -273,9 +284,9 @@ class PedidoBO:
             print("Só é possível cancelar pedidos no estado 'Recebido'.")
             return
 
-        pedido.set_estado(CanceladoState())
+        await pedido.set_estado(CanceladoState())
         self.dao.atualizar(pedido.id,pedido.status,pedido.valor_total, pedido.forma_pagamento, pedido.desconto, pedido.data_hora, pedido.cliente_id)
-        pedido.notificar_observadores()
+        await pedido.notificar_observadores()
         print("Pedido cancelado com sucesso.")
 
     def listar_pedidos_por_cliente(self, cliente_id: int):
@@ -284,16 +295,32 @@ class PedidoBO:
             return []
 
         pedidos_info = []
+
         for pedido in pedidos:
             itens = self.item_pedido_dao.listar_por_pedido(pedido.id)
+            if not itens:
+                print(f"Nenhum item de pedido encontrado para o pedido ID {pedido.id}")
+                continue
+
             itens_info = []
+
             for item in itens:
                 bebida = self.bebida_dao.buscar_por_id(item.bebida_id)
-                ingredientes = self.personalizacao_dao.listar_por_item_pedido(item.id)
+
+                ingredientes_personalizados = self.personalizacao_dao.listar_por_item_pedido(item.id)
+                if not ingredientes_personalizados:
+                    print(f"Nenhuma personalização encontrada para o item de pedido com ID {item.id}")
+
+                ingredientes_nomes = []
+                for p in ingredientes_personalizados:
+                    ingrediente = self.ingredientes_dao.get_ingrediente_by_id(p.ingredientes_id)
+                    if ingrediente:
+                        ingredientes_nomes.append(ingrediente.nome)
+
                 itens_info.append({
-                    "bebida": bebida.nome,
+                    "bebida": bebida.nome if bebida else "Desconhecida",
                     "preco": item.preco,
-                    "ingredientes": [ing.nome for ing in ingredientes]
+                    "ingredientes": ingredientes_nomes
                 })
 
             pedidos_info.append({

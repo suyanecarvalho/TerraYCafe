@@ -10,7 +10,7 @@ class PersonalizacaoDAO:
         with self.__db_connection as database:
             try:
                 personalizacao_data = Personalizacao(
-                    Ingredientes_id=ingredientes_id,
+                    ingredientes_id=ingredientes_id,
                     item_pedido_id=item_pedido_id
                 )
                 database.add(personalizacao_data)

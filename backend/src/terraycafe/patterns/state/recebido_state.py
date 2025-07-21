@@ -4,8 +4,8 @@ from terraycafe.patterns. state.estado_cancelado import CanceladoState
 
 
 class RecebidoState(EstadoPedido):
-    def proximo_estado(self, pedido):
-        pedido.set_estado(EmPreparoState())
+    async def proximo_estado(self, pedido):
+        await pedido.set_estado(EmPreparoState())
 
     def get_nome(self):
         return "Recebido"

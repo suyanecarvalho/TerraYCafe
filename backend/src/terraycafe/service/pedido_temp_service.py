@@ -13,3 +13,5 @@ class PedidoTempService:
     def limpar_bebidas_temp(self, cliente_id: int):
         if cliente_id in self.itens_temp_por_cliente:
             del self.itens_temp_por_cliente[cliente_id]
+
+pedido_temp_service_global = PedidoTempService()

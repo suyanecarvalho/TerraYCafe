@@ -2,8 +2,6 @@ from terraycafe.model.sqlite.entity.pedido import Pedidos
 from terraycafe.patterns.state.recebido_state import RecebidoState
 
 
-
-
 class PedidoDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
@@ -90,11 +88,14 @@ class PedidoDAO:
                 else:
                     database.add(pedido)
                 database.commit()
+                database.refresh(pedido)
             except Exception as e:
                 database.rollback()
                 raise e
-         
-    
+        
+    def listar_por_cliente(self, cliente_id: int):
+        return self.__db_connection.query(Pedidos).filter(Pedidos.cliente_id == cliente_id).all()
+
     def listar_todos(self) -> list[Pedidos]:  
         with self.__db_connection as database:
             try:

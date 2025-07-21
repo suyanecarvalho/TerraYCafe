@@ -11,6 +11,7 @@ from terraycafe.patterns.command.cancelar_pedido import CancelarPedido
 from terraycafe.patterns.command.invoker import Invoker
 from terraycafe.patterns.command.avancar_status_pedido import AvancarStatusPedido
 from terraycafe.model.sqlite.DAO.ingredientesDAO import IngredientesDAO
+from terraycafe.service.pedido_temp_service import pedido_temp_service_global
 
 router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 invoker = Invoker()
@@ -37,7 +38,13 @@ class PedidoRequest(BaseModel):
     cliente_id: int
     forma_pagamento: str
 
-
+class BebidaResponse(BaseModel):
+    id: int
+    nome: str
+    descricao: str
+    preco: float
+    ingredientes: List[int]
+    
 @router.patch("/{pedido_id}/status")
 async def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
@@ -49,17 +56,18 @@ async def avancar_status_pedido(pedido_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Erro ao avançar status: {e}")
 
 @router.patch("/{pedido_id}")
-def cancelar_pedido(pedido_id: int, db: Session = Depends(get_db)):
+async def cancelar_pedido(pedido_id: int, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
         comando = CancelarPedido(pedido_bo, pedido_id)
-        invoker.executar(comando)
+        await invoker.executar(comando)
         return {"message": f"Pedido {pedido_id} cancelado com sucesso"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao cancelar pedido: {e}")
 
-@router.post("/bebida/preparar")
+@router.post("/bebida/preparar", response_model=BebidaResponse)
 def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db)):
+    print("Request recebido:", request)
     try:
         pedido_bo = PedidoBO(db)
         resultado = pedido_bo.preparar_bebida(
@@ -68,9 +76,15 @@ def preparar_bebida(request: PrepararBebidaRequest, db: Session = Depends(get_db
             ingredientes=request.ingredientes,
             db=db
         )
-        pedido_bo.pedido_temp_service.adicionar_bebida_temp(request.cliente_id, resultado)
+        pedido_temp_service_global.adicionar_bebida_temp(request.cliente_id, resultado)
 
-        return resultado
+        print("Bebidas temporárias do cliente:", pedido_temp_service_global.get_bebidas_temp(request.cliente_id))
+
+        if not resultado or not isinstance(resultado, dict):
+            raise HTTPException(status_code=400, detail="Falha ao preparar bebida.")
+
+        print("Resultado da preparação:", resultado)
+        return BebidaResponse(**resultado)
 
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -105,9 +119,15 @@ def listar_todos_pedidos(db: Session = Depends(get_db)):
 async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
+        # Garanta que o BO usa o serviço global
+        pedido_bo.pedido_temp_service = pedido_temp_service_global
+        bebidas_temp = pedido_temp_service_global.get_bebidas_temp(request.cliente_id)
+        if not bebidas_temp:
+            raise HTTPException(status_code=400, detail="Nenhuma bebida preparada para este cliente.")
+        print("Bebidas temporárias do cliente antes de criar pedido:", bebidas_temp)
         novo_pedido = await pedido_bo.finalizar_pedido(
-            cliente_id=request.cliente_id,
-            forma_pagamento=request.forma_pagamento
+        cliente_id=request.cliente_id,
+        forma_pagamento=request.forma_pagamento
         )
         return {
             "pedido_id": novo_pedido.id,
@@ -115,3 +135,12 @@ async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao criar pedido: {e}")
+
+@router.get("/cliente/{cliente_id}")
+def listar_pedidos_por_cliente(cliente_id: int, db: Session = Depends(get_db)):
+    try:
+        pedido_bo = PedidoBO(db)
+        pedidos_info = pedido_bo.listar_pedidos_por_cliente(cliente_id)
+        return {"pedidos": pedidos_info}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao listar pedidos do cliente {cliente_id}: {e}")

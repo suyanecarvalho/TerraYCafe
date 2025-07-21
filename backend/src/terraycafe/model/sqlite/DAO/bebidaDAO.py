@@ -86,3 +86,11 @@ class BebidaDAO:
             except Exception as e:
                 print(f"Erro ao buscar bebida: {e}")
                 raise e
+    
+    def buscar_por_nome_descricao_preco(self, nome, descricao, preco_base):
+        with self.__db_connection as database:
+            return database.query(Bebida).filter(
+                Bebida.nome == nome,
+                Bebida.descricao == descricao,
+                Bebida.preco_base == preco_base
+            ).first()

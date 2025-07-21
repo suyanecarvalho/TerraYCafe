@@ -6,17 +6,19 @@ class ItemPedidoDAO:
     def __init__(self, db_connection):
         self.__db_connection = db_connection
 
-    def insert_item_pedido(self, pedido_id: int, preco: float, bebida_id: int) -> None:
+    def insert_item_pedido(self, pedido_id: int, preco: float, bebida_id: int) -> Item_pedido:
         with self.__db_connection as database:
             try:
                 item_pedido_data = Item_pedido(
                     pedido_id=pedido_id,
                     preco=preco,
-                    Bebida_id=bebida_id
+                    bebida_id=bebida_id
                 )
                 database.add(item_pedido_data)
                 database.commit()
+                database.refresh(item_pedido_data)
                 print(f"Inseriu item de pedido: {item_pedido_data}")
+                return item_pedido_data  # <-- Retorne o objeto criado!
             except Exception as e:
                 database.rollback()
                 print(f"Erro ao inserir item de pedido: {e}")

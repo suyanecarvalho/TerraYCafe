@@ -1,6 +1,7 @@
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import reconstructor
 from terraycafe.patterns.state.estado_em_preparo import EmPreparoState
+from terraycafe.patterns.state.estado_pronto import ProntoState
 from terraycafe.patterns.state.recebido_state import RecebidoState
 from terraycafe.model.sqlite.settings.connection import Base
 from terraycafe.patterns.observer.cliente_observer import ClienteObserver
@@ -32,6 +33,8 @@ class Pedidos(Base):
         # Adicione outros estados conforme necessário
         elif self.status == "Em Preparo":
             self.estado = EmPreparoState()
+        elif self.status == "Pronto":
+            self.estado = ProntoState()
         else:
             self.estado = RecebidoState()
             
@@ -52,19 +55,20 @@ class Pedidos(Base):
         if hasattr(self, "observadores"):
             for obs in self.observadores:
                 await obs.atualizar(pedido_id or self.id, status or self.status)
+        return True  # <-- Adicione isso para nunca retornar None
 
     def registrar_observadores(self):
         self.adicionar_observador(ClienteObserver())
         self.adicionar_observador(CozinhaObserver())
 
-    def set_estado(self, novo_estado):
+    async def set_estado(self, novo_estado):
         self.estado = novo_estado
         self.status = self.estado.get_nome()
-        self.notificar_observadores()
+        await self.notificar_observadores()
 
-    def avancar_estado(self):
-        self.estado.proximo_estado(self)
+    async def avancar_estado(self):
+        await self.estado.proximo_estado(self)
         self.status = self.estado.get_nome()
-        self.notificar_observadores()
+        await self.notificar_observadores()
 
 
