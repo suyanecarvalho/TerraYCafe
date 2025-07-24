@@ -140,7 +140,9 @@ async def criar_pedido(request: PedidoRequest, db: Session = Depends(get_db)):
 def listar_pedidos_por_cliente(cliente_id: int, db: Session = Depends(get_db)):
     try:
         pedido_bo = PedidoBO(db)
+        print("Buscando pedidos para cliente:", cliente_id)
         pedidos_info = pedido_bo.listar_pedidos_por_cliente(cliente_id)
         return {"pedidos": pedidos_info}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao listar pedidos do cliente {cliente_id}: {e}")
+    

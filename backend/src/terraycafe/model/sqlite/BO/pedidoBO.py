@@ -73,7 +73,7 @@ class PedidoBO:
     async def finalizar_pedido(self, cliente_id: int, forma_pagamento: str) -> Pedidos:
         # Recupera bebidas temporárias já preparadas
         bebidas_temp = self.pedido_temp_service.get_bebidas_temp(cliente_id)
-
+        print("Bebidas temporárias no momento do pedido:", bebidas_temp)
         if not bebidas_temp:
             raise ValueError("Nenhuma bebida preparada para este cliente.")
 
@@ -93,32 +93,20 @@ class PedidoBO:
             resultado_pagamento = pagamento.processar_pagamento(valor_bruto_total)
 
             pedido.valor_total = resultado_pagamento["valor_final"]
-            pedido.desconto = int(resultado_pagamento["desconto"])
-            pedido.forma_pagamento = resultado_pagamento["tipo_pagamento"]
+            pedido.desconto = resultado_pagamento["desconto"]
+            pedido.forma_pagamento = forma_pagamento
 
             self.dao.salvar(pedido)
             print("Pedido salvo:", pedido)
 
             for bebida_temp in bebidas_temp:
                 print("Processando bebida:", bebida_temp)
-                # Se já existe bebida no banco, busque pelo nome/descricao/preco
-                bebida_db = self.bebida_dao.buscar_por_nome_descricao_preco(
-                    nome=bebida_temp["nome"],
-                    descricao=bebida_temp["descricao"],
-                    preco_base=bebida_temp["preco"]
-                )
-                if not bebida_db:
-                    bebida_db = self.bebida_dao.insert_bebida(
-                        nome=bebida_temp["nome"],
-                        descricao=bebida_temp["descricao"],
-                        preco_base=bebida_temp["preco"]
-                    )
-                print("Bebida salva:", bebida_db)
-
+                # Use o ID salvo, não tente buscar/inserir de novo
+                bebida_id = bebida_temp["id"]
                 item_pedido = self.item_pedido_dao.insert_item_pedido(
                     pedido_id=pedido.id,
                     preco=bebida_temp["preco"],
-                    bebida_id=bebida_db.id
+                    bebida_id=bebida_id
                 )
                 print("Item pedido salvo:", item_pedido)
 
@@ -129,18 +117,18 @@ class PedidoBO:
                         ingredientes_id=ingrediente_id
                     )
 
-            self.pedido_temp_service.limpar_bebidas_temp(cliente_id)
 
+            self.pedido_temp_service.limpar_bebidas_temp(cliente_id)
             pedido.registrar_observadores()
             pedido.adicionar_observador(self.websocket_observer)
-            await pedido.notificar_observadores(pedido.id, pedido.status)
+            await pedido.notificar_observadores((pedido.id, pedido.status, pedido.cliente_id))
+
 
             return pedido
 
         except Exception as e:
             print("Erro interno ao finalizar pedido:", e)
             raise
-
     async def avancar_status(self, pedido_id: int):
         pedido = self.dao.buscar_por_id(pedido_id)
         if pedido:
@@ -148,9 +136,6 @@ class PedidoBO:
             await pedido.avancar_estado()
             self.dao.atualizar(pedido.id,pedido.status,pedido.valor_total, pedido.forma_pagamento, pedido.desconto, pedido.data_hora, pedido.cliente_id)
             await pedido.notificar_observadores((pedido.id, pedido.status))  # Notifica todos observers
-
-
-# ...existing code...
 
     async def alterar_pedido(self, pedido_id: int, novos_dados: dict) -> Pedidos:
         """
@@ -192,36 +177,53 @@ class PedidoBO:
                     if isinstance(item, dict):
                         ingredientes = item.get("ingredientes", [])
                         tipo = item["tipo_bebida"]
+                        bebida_id = item.get("id")  # <-- Pegue o id da bebida já criada
                     else:
                         ingredientes = getattr(item, "ingredientes", [])
                         tipo = getattr(item, "tipo_bebida")
-                    # Criar bebida personalizada
-                    fabrica = get_fabrica(tipo)
-                    if not fabrica:
-                        raise ValueError(f"Tipo de bebida inválido: {tipo}")
-                    
-                    bebida = fabrica.criar_bebida()
-                    bebida_personalizada = aplicar_personalizacoes(bebida, ingredientes)
-                    preco_item = bebida_personalizada.get_preco()
+                        bebida_id = getattr(item, "id", None)
+
+                    # Buscar bebida pelo ID, se existir
+                    bebida_db = None
+                    if bebida_id:
+                        bebida_db = self.bebida_dao.buscar_por_id(bebida_id)
+
+                    if not bebida_db:
+                        # Se não existir, crie uma nova
+                        fabrica = get_fabrica(tipo)
+                        if not fabrica:
+                            raise ValueError(f"Tipo de bebida inválido: {tipo}")
+                        bebida = fabrica.criar_bebida()
+                        bebida_personalizada = aplicar_personalizacoes(bebida, ingredientes)
+                        nome = bebida_personalizada.get_nome()
+                        descricao = bebida_personalizada.get_descricao()
+                        preco_item = round(bebida_personalizada.get_preco(), 2)
+                        # Tente buscar por nome/descrição/preço antes de criar
+                        bebida_db = self.bebida_dao.buscar_por_nome_descricao_preco(
+                            nome=nome,
+                            descricao=descricao,
+                            preco_base=preco_item
+                        )
+                        if not bebida_db:
+                            bebida_db = self.bebida_dao.insert_bebida(
+                                nome=nome,
+                                descricao=descricao,
+                                preco_base=preco_item,
+                            )
+                    else:
+                        preco_item = round(bebida_db.preco_base, 2)
                     valor_bruto_total += preco_item
-                    
-                    # Salvar bebida no banco
-                    bebida_db = self.bebida_dao.insert_bebida(
-                        nome=bebida_personalizada.get_nome(),
-                        descricao=bebida_personalizada.get_descricao(),
-                        preco_base=preco_item,
-                    )
-                    
-                    # Salvar item do pedido
+
+                    # Sempre crie o item do pedido, independente de ser bebida nova ou existente
                     self.item_pedido_dao.insert_item_pedido(
                         pedido_id=pedido_id,
                         preco=preco_item,
                         bebida_id=bebida_db.id
                     )
-                    
+
                     # Buscar o item recém-criado
                     item_pedido = self.item_pedido_dao.get_ultimo_item_pedido()
-                    
+
                     # Salvar personalizações
                     for ingrediente_id in ingredientes:
                         self.personalizacao_dao.insert_personalizacao(
@@ -295,30 +297,19 @@ class PedidoBO:
             return []
 
         pedidos_info = []
-
         for pedido in pedidos:
             itens = self.item_pedido_dao.listar_por_pedido(pedido.id)
-            if not itens:
-                print(f"Nenhum item de pedido encontrado para o pedido ID {pedido.id}")
-                continue
-
             itens_info = []
-
             for item in itens:
                 bebida = self.bebida_dao.buscar_por_id(item.bebida_id)
-
                 ingredientes_personalizados = self.personalizacao_dao.listar_por_item_pedido(item.id)
-                if not ingredientes_personalizados:
-                    print(f"Nenhuma personalização encontrada para o item de pedido com ID {item.id}")
-
                 ingredientes_nomes = []
                 for p in ingredientes_personalizados:
                     ingrediente = self.ingredientes_dao.get_ingrediente_by_id(p.ingredientes_id)
                     if ingrediente:
                         ingredientes_nomes.append(ingrediente.nome)
-
                 itens_info.append({
-                    "bebida": bebida.nome if bebida else "Desconhecida",
+                    "bebida": bebida.nome if bebida else "Bebida não encontrada",
                     "preco": item.preco,
                     "ingredientes": ingredientes_nomes
                 })

@@ -50,7 +50,7 @@ class PedidoDAO:
                     pedido.forma_pagamento = forma_pagamento
                     pedido.desconto = desconto
                     pedido.data_hora = data_hora
-                    pedido.Cliente_id = cliente_id
+                    pedido.cliente_id = cliente_id
                     database.commit()
                     print(f"Atualizou pedido: {pedido}")
                 else:
@@ -76,9 +76,28 @@ class PedidoDAO:
                 raise e
     
     def salvar(self, pedido: Pedidos) -> None:
+        from terraycafe.model.sqlite.DAO.bebidaDAO import BebidaDAO  # Importação local para evitar ciclos
         with self.__db_connection as database:
             try:
-                if pedido.id:
+                bebida_dao = BebidaDAO(self.__db_connection)
+                # Verifica e evita bebidas duplicadas nos itens do pedido
+                if hasattr(pedido, "itens"):
+                    for item in pedido.itens:
+                        bebida = item.bebida
+                        if bebida:
+                            bebida_existente = bebida_dao.buscar_por_nome_descricao_preco(
+                                nome=bebida.nome,
+                                descricao=bebida.descricao,
+                                preco_base=bebida.preco_base
+                            )
+                            if bebida_existente:
+                                # Usa a bebida existente em vez de criar uma nova
+                                item.bebida_id = bebida_existente.id
+                                item.bebida = bebida_existente
+                            else:
+                                # Adiciona a bebida nova normalmente
+                                database.add(bebida)
+                if database.get(Pedidos, pedido.id):
                     pedido_existente = database.query(Pedidos).filter(Pedidos.id == pedido.id).first()
                     if pedido_existente:
                         for attr, value in vars(pedido).items():

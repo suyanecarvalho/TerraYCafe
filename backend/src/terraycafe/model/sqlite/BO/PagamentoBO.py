@@ -6,11 +6,16 @@ class PagamentoContext:
     def __init__(self,tipo_pagamento: str):
         self.strategy= self._definir_estrategia(tipo_pagamento)
         
-    def _definir_estrategia(self, tipo_pag: str) :
-        if tipo_pag== "fidelidade":
+    def _definir_estrategia(self, tipo_pag: str):
+        tipo_pag = tipo_pag.lower()
+        if tipo_pag == "fidelidade" or tipo_pag == "voucher":
             return DescontoFidelidade()
         elif tipo_pag == "pix":
             return DescontoPix()
+        elif tipo_pag == "debito":
+            return SemDesconto()
+        elif tipo_pag == "credito":
+            return SemDesconto()
         else:
             return SemDesconto()       
     
