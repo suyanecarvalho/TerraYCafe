@@ -28,7 +28,7 @@ Sistema completo para gestão de pedidos em uma cafeteria, utilizando FastAPI, S
 ### Frontend (React)
 1. Entre na pasta do frontend:
    ```bash
-   cd frontend
+   cd front
    ```
 2. Instale as dependências:
    ```bash
